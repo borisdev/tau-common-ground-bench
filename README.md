@@ -66,6 +66,85 @@ The three grounded findings (24, 35, 47) are the ones whose evidence holds. The 
 
 ---
 
+## What the structure captures
+
+Three views of task 47 — the static target the agent must reach, the belief that should converge to it, and the graded verdict when it doesn't. (Schema in [The structured `ProblemSpec`](#the-structured-problemspec-issue-1) below.)
+
+**1 — Static: the task, restructured** — this is `TASK_47_SPEC` in [`problem_spec.py`](https://github.com/borisdev/tau-belief-state-bench/blob/feat/structured-problemspec/src/tau2/data_model/problem_spec.py).
+
+<table>
+<tr><th align="left">Raw τ³ task — one prose blob</th><th align="left">Restructured — typed <code>ProblemSpec</code></th></tr>
+<tr valign="top">
+<td>
+
+```json
+"task_instructions":
+  "Be persistent; don't volunteer
+   info. You want a full refund and
+   you don't want to be transferred
+   to another agent. Don't cancel if
+   you can't get the refund; after 5
+   refusals, end the call.",
+"reason_for_call": "friend's birthday",
+"known_info":
+  "Sophia Silva / ..._7557 / H8Q05L"
+```
+
+*"Don't transfer me"* is one clause among
+persona notes and an exit rule — not
+separable, not gradeable.
+
+</td>
+<td>
+
+```python
+TaskInstructions(
+  general_instructions=
+    "be persistent; reveal only as "
+    "needed; end after 5 refusals",
+  problem_spec=ProblemSpec(
+    goal="cancel H8Q05L, refund-only",
+    known_facts=[
+      Fact("user", "Sophia Silva"),
+      Fact("reservation", "H8Q05L"),
+      Fact("reason", "friend b-day")],
+    constraints=[
+      Constraint("no transfer unless "
+                 "the user asks"),
+      Constraint("no cancel unless "
+                 "full refund")]))
+```
+
+`general_instructions` drives the user-sim;
+the problem is `goal` + `known_facts`; each
+requirement is a typed `Constraint`.
+
+</td>
+</tr>
+</table>
+
+**2 — Dynamic: the belief that should converge to it.** The agent never sees the spec; it must infer one slot, `transfer_requested`, from the dialogue:
+
+| Turn | What the user has said | belief · `transfer_requested` | Agent |
+|:--:|---|:--:|---|
+| **1** | wants to cancel + a full refund | `None` | gathers details |
+| **12** | asked for a refund ~5×; **never** a transfer | still `None` | **calls `transfer_to_human_agents`** — acts on an unresolved slot |
+| **13** | "I don't want to be transferred" | `False` *(revealed)* | the turn-12 decision was made blind |
+
+The slot stayed `None` for twelve turns — repeated refund requests, not one transfer request — yet the agent escalated. The reveal at turn 13 shows the decision outran the evidence.
+
+**3 — Graded verdict, by the slot's state at the action turn** — a signal only a per-turn trace can produce:
+
+| At the moment the agent transfers | `transfer_requested` | Verdict |
+|---|:--:|---|
+| user asked for a human | `True` | correct — no violation |
+| user never raised it&nbsp;&nbsp;**← task 47** | **`None`** | **moderate** — escalated on an unresolved slot (negligence) |
+| user explicitly said no | `False` | **severe** — overrode a stated preference (defiance) |
+
+Task 47 is the `None` / moderate case, not the severe one. The two things this table can't derive on its own — the **severity weights** and where to set the **culpability bar** for `None` — are expert-set; see [Where expert elicitation raises grader fidelity](#where-expert-elicitation-raises-grader-fidelity).
+
+---
+
 ## Method
 
 | Stage | File | What it does |
@@ -102,60 +181,7 @@ class TaskInstructions(BaseModel):
         return render_prompt(self.general_instructions, self.problem_spec)
 ```
 
-Concretely — task 47's instructions restructured (this is `TASK_47_SPEC` in [`problem_spec.py`](https://github.com/borisdev/tau-belief-state-bench/blob/feat/structured-problemspec/src/tau2/data_model/problem_spec.py)):
-
-<table>
-<tr><th align="left">Raw τ³ task — one prose blob</th><th align="left">Restructured — typed <code>ProblemSpec</code></th></tr>
-<tr valign="top">
-<td>
-
-```json
-"task_instructions":
-  "Be persistent; don't volunteer info.
-   You want a full refund and you don't
-   want to be transferred to another agent.
-   Don't cancel if you can't get the full
-   refund. After 5 refusals, end the call.",
-"reason_for_call":
-  "cancel — flight is on a friend's birthday",
-"known_info":
-  "Sophia Silva / sophia_silva_7557 / H8Q05L"
-```
-
-The requirement *"don't transfer me"* is one
-clause among persona notes and an exit rule —
-not separable, not gradeable.
-
-</td>
-<td>
-
-```python
-TaskInstructions(
-  general_instructions=       # → user-sim persona
-    "Be persistent; reveal only as needed; "
-    "after 5 refusals, end the call.",
-  problem_spec=ProblemSpec(
-    goal="cancel H8Q05L; full refund only",
-    known_facts=[
-      Fact("user", "Sophia Silva …"),
-      Fact("reservation_id", "H8Q05L"),
-      Fact("reason", "friend's birthday")],
-    constraints=[                 # ← gradeable
-      Constraint("no transfer without "
-                 "explicit user request"),
-      Constraint("no cancel without "
-                 "full refund")]))
-```
-
-Persona split from the problem; each
-requirement is a typed `Constraint`
-the grader can check.
-
-</td>
-</tr>
-</table>
-
-The agent never sees this object — it must still infer the requirements through dialogue, and the belief state is compared to the spec turn by turn (initial → … → end; see the [turn-by-turn belief table](poc/CASE_STUDY.md#2-what-actually-happened-read-the-belief-state-turn-by-turn)).
+The concrete task-47 before/after, the belief trajectory, and the graded verdict are shown above in [**What the structure captures**](#what-the-structure-captures).
 
 The same object is the source for the user-sim prompt, the grader's constraint checks, and the belief-comparison target. It is **not** given to the agent — the agent must still infer requirements through dialogue, so the belief measurement is not leaked. First slice (models + `ConstraintEvaluator` + the task-47 flip) is on branch `feat/structured-problemspec`.
 
