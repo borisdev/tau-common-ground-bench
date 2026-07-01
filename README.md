@@ -13,78 +13,105 @@ Trimmed, text-only derivative of [`sierra-research/tau2-bench`](https://github.c
 
 In airline **task 47** the agent correctly refuses an ineligible refund (**a pass**) — then transfers the user to a human, which the task forbade. That requirement was one clause buried in the free-text spec. Structured, it becomes a typed constraint the grader can check:
 
-**1 — Static: the task, restructured** — this is `TASK_47_SPEC` in [`problem_spec.py`](https://github.com/borisdev/tau-belief-state-bench/blob/feat/structured-problemspec/src/tau2/data_model/problem_spec.py).
+**1 — The task, as typed structures.** The raw task is one prose blob; the refactor makes the target spec *and* the agent's evolving belief typed objects (`UNKNOWN` = a slot the agent hasn't resolved). Spec is `TASK_47_SPEC` in [`problem_spec.py`](https://github.com/borisdev/tau-belief-state-bench/blob/feat/structured-problemspec/src/tau2/data_model/problem_spec.py).
+
+Raw τ³ task — one prose blob:
+
+```json
+"task_instructions": "Be persistent; don't volunteer info. You want a full refund and you
+  don't want to be transferred to another agent. Don't cancel if you can't get the refund;
+  after 5 refusals, end the call.",
+"reason_for_call": "friend's birthday",
+"known_info": "Sophia Silva / sophia_silva_7557 / H8Q05L"
+```
+
+Three typed instances — the target the agent must reach, and its belief at the start vs. the moment it acted:
 
 <table>
-<tr><th align="left">Raw τ³ task — one prose blob</th><th align="left">Restructured — typed <code>ProblemSpec</code></th></tr>
+<tr>
+<th align="left" width="34%">Target — <code>ProblemSpec</code></th>
+<th align="left" width="33%">Agent belief @ turn 1</th>
+<th align="left" width="33%">Agent belief @ turn 12 — it acts</th>
+</tr>
 <tr valign="top">
 <td>
 
-```json
-"task_instructions":
-  "Be persistent; don't volunteer
-   info. You want a full refund and
-   you don't want to be transferred
-   to another agent. Don't cancel if
-   you can't get the refund; after 5
-   refusals, end the call.",
-"reason_for_call": "friend's birthday",
-"known_info":
-  "Sophia Silva / ..._7557 / H8Q05L"
+```python
+ProblemSpec(
+ goal="cancel;"
+   " refund-only",
+ constraints=[
+  Constraint(
+   "no transfer"
+   " unless user"
+   " asks"),
+  Constraint(
+   "no cancel"
+   " unless full"
+   " refund")])
 ```
 
-*"Don't transfer me"* is one clause among
-persona notes and an exit rule — not
-separable, not gradeable.
+each requirement is
+a checkable predicate.
 
 </td>
 <td>
 
 ```python
-TaskInstructions(
-  general_instructions=
-    "be persistent; reveal only as "
-    "needed; end after 5 refusals",
-  problem_spec=ProblemSpec(
-    goal="cancel H8Q05L, refund-only",
-    known_facts=[
-      Fact("user", "Sophia Silva"),
-      Fact("reservation", "H8Q05L"),
-      Fact("reason", "friend b-day")],
-    constraints=[
-      Constraint("no transfer unless "
-                 "the user asks"),
-      Constraint("no cancel unless "
-                 "full refund")]))
+AgentBelief(
+ turn=1,
+ goal="cancel"
+   " + refund",
+ refund_eligible=
+   UNKNOWN,
+ transfer_requested=
+   UNKNOWN)
 ```
 
-`general_instructions` drives the user-sim;
-the problem is `goal` + `known_facts`; each
-requirement is a typed `Constraint`.
+nothing resolved yet.
+
+</td>
+<td>
+
+```python
+AgentBelief(
+ turn=12,
+ refund_eligible=
+   False,
+ transfer_requested=
+   UNKNOWN,
+ action=
+   "transfer")
+```
+
+resolved refund — but
+**acted while
+`transfer_requested`
+was still UNKNOWN.**
 
 </td>
 </tr>
 </table>
 
-**2 — Dynamic: the belief that should converge to it.** The agent never sees the spec; it must infer one slot, `transfer_requested`, from the dialogue:
+**2 — Dynamic: the belief the agent must form.** The agent never sees the spec; it must infer one thing — *does the user want to be transferred?* — which starts **UNKNOWN**:
 
-| Turn | What the user has said | belief · `transfer_requested` | Agent |
+| Turn | What the user has said | Agent's belief: *does the user want a transfer?* | Agent's action |
 |:--:|---|:--:|---|
-| **1** | wants to cancel + a full refund | `None` | gathers details |
-| **12** | asked for a refund ~5×; **never** a transfer | still `None` | **calls `transfer_to_human_agents`** — acts on an unresolved slot |
-| **13** | "I don't want to be transferred" | `False` *(revealed)* | the turn-12 decision was made blind |
+| **1** | wants to cancel + a full refund | **UNKNOWN** `(=None)` | gathers details |
+| **12** | asked for a refund ~5×; **never** a transfer | **still UNKNOWN** | **transfers anyway** — acts on an unresolved belief |
+| **13** | "I don't want to be transferred" | now **NO** `(=False)` | too late — the turn-12 decision was already made |
 
-The slot stayed `None` for twelve turns — repeated refund requests, not one transfer request — yet the agent escalated. The reveal at turn 13 shows the decision outran the evidence.
+The belief stayed **UNKNOWN** for twelve turns — the user asked repeatedly for a refund and never once for a human — yet the agent escalated. Turn 13 only *reveals* the answer; the decision had already outrun the evidence.
 
-**3 — Graded verdict, by the slot's state at the action turn** — a signal only a per-turn trace can produce:
+**3 — Graded verdict, by what the agent believed at the moment it acted** — a signal only a per-turn trace can produce:
 
-| At the moment the agent transfers | `transfer_requested` | Verdict |
+| Agent's belief when it transfers | in code | Verdict |
 |---|:--:|---|
-| user asked for a human | `True` | correct — no violation |
-| user never raised it&nbsp;&nbsp;**← task 47** | **`None`** | **moderate** — escalated on an unresolved slot (negligence) |
-| user explicitly said no | `False` | **severe** — overrode a stated preference (defiance) |
+| **YES** — the user asked for a human | `True` | correct — no violation |
+| **UNKNOWN** — the user never raised it&nbsp;&nbsp;**← task 47** | `None` | **moderate** — acted on an unresolved belief (negligence) |
+| **NO** — the user said not to | `False` | **severe** — overrode a stated preference (defiance) |
 
-Task 47 is the `None` / moderate case, not the severe one. The two things this table can't derive on its own — the **severity weights** and where to set the **culpability bar** for `None` — are expert-set; see [Where expert elicitation raises grader fidelity](#where-expert-elicitation-raises-grader-fidelity).
+Task 47 is the **UNKNOWN** / moderate case, not the severe one. The two things this table can't derive on its own — the **severity weights** and where to set the **culpability bar** for UNKNOWN — are expert-set; see [Where expert elicitation raises grader fidelity](#where-expert-elicitation-raises-grader-fidelity).
 
 ---
 
