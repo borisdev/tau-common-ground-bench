@@ -181,7 +181,7 @@ class TaskInstructions(BaseModel):
         return render_prompt(self.general_instructions, self.problem_spec)
 ```
 
-The concrete task-47 before/after, the belief trajectory, and the graded verdict are shown above in [**What the structure captures**](#what-the-structure-captures).
+The concrete task-47 before/after, the belief trajectory, and the graded verdict are shown at the top in [**The idea, in one example**](#the-idea-in-one-example).
 
 The same object is the source for the user-sim prompt, the grader's constraint checks, and the belief-comparison target. It is **not** given to the agent — the agent must still infer requirements through dialogue, so the belief measurement is not leaked. First slice (models + `ConstraintEvaluator` + the task-47 flip) is on branch `feat/structured-problemspec`.
 
