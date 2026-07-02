@@ -6,14 +6,14 @@
 
 ## What is this about?
 
-We extend τ³-bench from evaluating only the terminal DB state to also evaluating the **convergence (or divergence) of the agent's `BeliefState` toward the user's true `ProblemSpec`** — the understanding the agent forms in order to act. Beyond better-behaved agents, this has two positive side-effects: a **more precise grader**, and a **more explicit way to integrate expert knowledge**.
-
-Formally, a dialogue is *partially observable*: the user's objective is a **latent variable** the agent infers from partial, incrementally-revealed evidence. τ-bench applies **outcome supervision** (it scores the terminal state); we add **process supervision over the belief state**. *(Framing in the literature's terms — POMDP belief states, assistance games, process reward models — is in [`FRAMING.md`](FRAMING.md).)*
+We extend τ³-bench from evaluating only the terminal DB state to also evaluating the **convergence (or divergence) of the agent's `BeliefState` toward the user's true `ProblemSpec`** — the understanding the agent forms in order to act.
 
 **Why it matters for AI quality.**
 - **Better-behaved agents.** Two agents reaching the same end state can differ in whether they understood the problem, asked before acting, or respected constraints. Grading belief-convergence + constraints turns those *process* differences into signal — for eval *and* for training.
 - **A more precise grader.** Decomposing a holistic judgment into checkable predicates raises reliability (factored / rubric-based evaluation) and closes **silent false-passes** — catching violations outcome-only scoring is structurally blind to.
 - **Explicit expert knowledge.** The `ProblemSpec` is code an expert enriches; encoded expertise **compounds** into both a sharper grader and a better training target — a learning loop, not a one-off benchmark.
+
+Formally, a dialogue is *partially observable*: the user's objective is a **latent variable** the agent infers from partial, incrementally-revealed evidence. τ-bench applies **outcome supervision** (it scores the terminal state); we add **process supervision over the belief state**. *(Framing in the literature's terms — POMDP belief states, assistance games, process reward models — is in [`FRAMING.md`](FRAMING.md).)*
 
 ---
 
