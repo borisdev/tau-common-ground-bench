@@ -1,5 +1,7 @@
 # Framing & related work
 
+A customer-service dialogue is *partially observable*: the user's objective is a **latent variable** the agent infers from partial, incrementally-revealed evidence. τ-bench applies **outcome supervision** (it scores the terminal state); this layer adds **process supervision over the belief state**.
+
 ## 1. The agent's belief converging to the hidden problem
 
 The task is *partially observable*: the agent maintains a **belief state** — a posterior over a **latent variable** (the user's true objective) that it updates from partial, incrementally-revealed evidence.

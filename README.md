@@ -11,8 +11,6 @@ We extend τ³-bench from evaluating only the terminal DB state to also evaluati
 - **A more precise grader.** Decomposing a holistic judgment into checkable predicates raises reliability (factored / rubric-based evaluation) and closes **silent false-passes** — catching violations outcome-only scoring is structurally blind to.
 - **Explicit expert knowledge.** The `ProblemSpec` is versioned, executable code that turns tacit expertise into checkable rules; enriching it **compounds** into a sharper grader and a better training target — a learning loop, and an auditable record of what *correct* means as policy changes.
 
-Formally, a dialogue is *partially observable*: the user's objective is a **latent variable** the agent infers from partial, incrementally-revealed evidence. τ-bench applies **outcome supervision** (it scores the terminal state); we add **process supervision over the belief state**. *(Framing in the literature's terms — POMDP belief states, assistance games, process reward models — is in [`FRAMING.md`](FRAMING.md).)*
-
 ---
 
 ## Motivation: The grader's belief blind spot causes a bug
@@ -160,6 +158,7 @@ The grader is only as good as the ontology it compiles — and the ontology is p
 ## Repository map
 
 - **Design:** [`PROBLEM_BELIEF_SPEC.md`](PROBLEM_BELIEF_SPEC.md) — the gap, the belief-state schema, metrics, integration.
+- **Framing / related work:** [`FRAMING.md`](FRAMING.md) — POMDP belief states, assistance games, process reward models, the Good Regulator theorem.
 - **Worked example:** [`poc/CASE_STUDY.md`](poc/CASE_STUDY.md) — task 47 with verbatim runtime objects and a turn-by-turn belief table.
 - **Per-task detail:** [`poc/FINDINGS.md`](poc/FINDINGS.md) — the table above with evidence and the verifier output.
 - **Code / data:** [`poc/`](poc/) scripts and JSON artifacts; readable transcripts in [`poc/traces/`](poc/traces/).
