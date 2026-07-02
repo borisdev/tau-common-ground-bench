@@ -2,15 +2,9 @@
 
 A per-turn **belief-state** instrumentation layer for τ-bench (the `tau2-bench` repo at its τ³ release).
 
-> **Better AI performance** — *what you need.* Ship agents that understand the user *before* they act — not agents that pass your benchmark and then fail in production.
->
-> **Why** *(the rationale).* Your agent eval grades the final state, so it passes agents that violated what the user actually asked — e.g. **task 47**: the agent transferred a user who explicitly said "don't transfer me," and it scored **PASS**. The grade is blind to whether the agent even understood the problem.
->
-> **How we figured it out.** A per-turn **belief-state** layer that scores whether the agent understood the problem *before* grading the solution — surfacing the silent pass-but-broken cases a terminal grade can't see.
-
 ---
 
-## The bug
+## The grader's blind spot
 
 In airline **task 47** the agent correctly refuses an ineligible refund (**a pass**) — then transfers the user to a human, which the task forbade. That requirement was one clause buried in the free-text spec. Structured, it becomes a typed constraint the grader can check.
 
