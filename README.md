@@ -1,6 +1,6 @@
 # tau-belief-state-bench
 
-A per-turn **belief-state** instrumentation layer for τ-bench (the `tau2-bench` repo at its τ³ release).
+**Process supervision for τ-bench** — grade the agent's *belief state* (its evolving estimate of the user's latent problem), not just the terminal world state the benchmark scores today.
 
 ---
 
