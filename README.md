@@ -8,13 +8,13 @@
 
 **The programme.** This work is part of a broader effort in the AI evaluation community to identify recurring failure patterns and target behaviors that can be improved with input from human domain experts.
 
+> **Two phases.** This paper delivers **Phase 1** and is built to feed **Phase 2** — keep an eye on the second one; it's where the expert data enters.
+> 1. **Flag — automated, no expert.** An LLM-as-judge structures the latent problem (from τ³ `task_instructions`) and the agent's belief, then flags **epistemic ambiguity**: the agent acting before it resolved what it needed to know.
+> 2. **Fill — targeted expert data.** Only at the flagged spots, a domain expert authors the missing rule as a **PDDL epistemic precondition** — which then drives both **grading** and **gating**.
+
 ## Innovation
 
 Our eval innovation: we **instrument the unobservable** — the user's latent problem and the agent's current belief — as two comparable typed objects, and treat the **gap between them as the failure signal**. That gap flags exactly where **targeted expert data** most improves AI quality.
-
-**Two phases.**
-1. **Flag — automated, no expert.** An LLM-as-judge structures the latent problem (from τ³ `task_instructions`) and the agent's belief, then flags **epistemic ambiguity**: the agent acting before it resolved what it needed to know.
-2. **Fill — targeted expert data.** Only at the flagged spots, a domain expert authors the missing rule as a **PDDL epistemic precondition** — which then drives both **grading** and **gating**.
 
 **Why it matters for AI quality.**
 - **A more precise, deterministic grader** — the next section shows a real bug it catches on a live τ³ airline task.
