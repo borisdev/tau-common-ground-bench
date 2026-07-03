@@ -2,32 +2,35 @@
 
 *Does the agent establish sufficient common ground — enough shared understanding — before acting?*
 
-**This benchmark.** We extend τ³-bench from grading only the terminal database state to also grading whether the agent got on the same page with the user before acting.
+**AI benchmark.** We extend τ³-bench from grading only the terminal database state to also grading whether the agent got on the same page with the user before acting.
 
 **Failure pattern.** We study one broad failure pattern: acting without sufficient consent or understanding instead of asking first. τ³-bench uses airline support, but the pattern is general — the same failure occurs when coding, medical, or financial agents act before they understand.
 
 **Failure pattern example.** In our test run, Claude Haiku correctly refuses an ineligible refund, then transfers the user to a human — even though the task says *"you don't want to be transferred to another agent."* τ³-bench scores it **PASS**, despite the agent never establishing common ground about whether the user wanted the transfer. Flagging this pattern is our job.
 
-**The programme.** This work is part of a broader **two-phase** effort in the AI evaluation community: **Phase 1** identifies recurring failure patterns; **Phase 2** uses them to pinpoint what human domain expertise must be encoded into AI models.
+**Research programme.** This work is part of a broader **two-phase** effort in the AI evaluation community: **Phase 1** identifies recurring failure patterns; **Phase 2** uses them to pinpoint what human domain expertise must be encoded into AI models.
 
 > **Our two phases.**
 > 1. **Flag** — use evals (exploratory data analysis) to flag **bad-action ambiguity**: an agent acting before it resolved what it needed to know.
 > 2. **Resolve** — encode expert **action-precondition rules** (policies) that resolve it, driving both **grading** and **gating**.
 
-## Key terms
+## Glossary
 
-A quick glossary before the deeper sections.
+*Sequenced by dependency — each definition uses only the terms above it. The [Innovation](#innovation) section below assumes all of them.*
 
-- **Common ground / common grounding** — the shared understanding two parties create, repair, and update in dialogue; an established term (Clark 1991; [Udagawa & Aizawa, AAAI 2019](https://arxiv.org/abs/1907.03399)). Informally, being "on the same page."
-- **Ontic** — about what is *true in the world* (a state-checkable fact).
-- **Epistemic** — about what the agent *knows* (a belief, possibly still unresolved).
-- **`ProblemSpec`** — the true, typed shape of the user's problem (ground truth; the agent never sees it).
-- **`ProblemSpecBelief`** — the agent's estimate of that shape; slots start `UNKNOWN` until resolved.
-- **Ambiguity** — the gap between `ProblemSpec` and `ProblemSpecBelief` on the fields the pending action needs.
-- **Epistemic precondition** — a fact the agent must *know* before an action may fire.
-- **Epistemic ambiguity** — acting before a required epistemic precondition is resolved (the failure we flag).
-- **Gating / grading** — applying a precondition at runtime (ask vs. act) / in eval (pass vs. fail).
-- **PDDL** — Planning Domain Definition Language; models an action as name / parameters / preconditions / effects.
+- **Common ground / common grounding** — the shared understanding two parties create, repair, and update in dialogue; an established term (Clark 1991; [Udagawa & Aizawa, AAAI 2019](https://arxiv.org/abs/1907.03399)). Our whole target: does the agent reach *enough* of it before acting?
+- **Ontic predicate** — a fact about the world, resolvable by a **database query** (e.g., `refund_eligible` — check the fare rules). τ³ already grades these.
+- **Epistemic predicate** — a fact about what the *agent knows*. **No DB query can resolve it** — the agent must **probe the user** (ask) to reduce the ambiguity in its belief. *Why the word earns its keep (counterfactual):* drop "epistemic" and "precondition" defaults to **ontic** — you query the DB, see nothing wrong, and pass task 47. "Epistemic" is the intervention: it redirects the check from the world to the agent's belief. Without the word, the failure is invisible.
+- **`ProblemSpec`** — the true, typed shape of the user's problem (ground truth; the agent never sees it). Its fields are ontic or epistemic. [see it built →](#problemspec-and-problemspecbelief)
+- **`ProblemSpecBelief`** — the agent's estimate of the `ProblemSpec`; each slot `UNKNOWN` until the agent resolves it by probing.
+- **Ambiguity** — the gap between the `ProblemSpec` and the `ProblemSpecBelief` over the fields the pending action needs.
+- **Epistemic precondition** — an epistemic predicate an action requires the agent to *know* (resolve) before it may fire. [details →](docs/epistemic-preconditions.md)
+- **Underspecification** *(cause)* — an action's epistemic preconditions were never authored; the policy is incomplete.
+- **Epistemic ambiguity** *(effect)* — the agent acts while an epistemic precondition is still unresolved. Underspecification is the **cause**; epistemic ambiguity is the **symptom** our eval flags — and an expert resolves it by authoring the missing precondition.
+- **Gating / grading** — using an epistemic precondition at runtime (**gate**: ask vs. act) and in eval (**grade**: pass vs. fail). [SME-authored policy →](#sme-authored-policy-what-ambiguity-to-resolve-before-acting)
+- **PDDL** — Planning Domain Definition Language; models an action as name / parameters / preconditions / effects. We extend its preconditions with the epistemic kind (related: [PDDL-Mind](https://arxiv.org/abs/2604.17819)).
+
+Deeper theory (POMDP belief states, assistance games, reward models): [`FRAMING.md`](FRAMING.md).
 
 ## Innovation
 
@@ -40,7 +43,7 @@ Our eval innovation: we **instrument the unobservable** — the user's latent pr
 
 ---
 
-## What is "resolving ambiguity" (getting on the same page) all about?
+## What is "resolving ambiguity" (reaching common ground) all about?
 
 We define **ambiguity** as the gap between the true [`ProblemSpec`](#problemspec-and-problemspecbelief) and the agent's [`ProblemSpecBelief`](#problemspec-and-problemspecbelief) over the fields required to safely execute the pending action.
 
