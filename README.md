@@ -70,20 +70,20 @@ Subject-matter experts (SMEs) **hydrate** these offline: for each tool action, *
 
 #### Some example epistemic preconditions τ³ can't grade in airline customer service
 
-Each is a `knows(slot == …)` guard on the belief state. Violations are **DB-invisible**: the terminal database looks identical to a correct run, so state-grading passes them.
+Each is a `belief.X` guard on the belief state. Violations are **DB-invisible**: the terminal database looks identical to a correct run, so state-grading passes them.
 
-| # | Action | Epistemic guard | Class | Violation looks like (DB-invisible) |
-|:--:|---|---|---|---|
-| 1 | `transfer_to_human_agents` | `knows(transfer_requested == True)` | consent | Agent gives up and escalates; user never asked. **Task 47.** |
-| 2 | `cancel_reservation` **vs** `update_reservation_flights` | `knows(action_serves_goal == True)` | goal-fit | User wanted to keep the trip but dodge a fee; agent cancels. Wrong *action*, valid *effect*. |
-| 3 | `cancel_reservation` | `knows(cancel_confirmed == True)` | confirmation | User vented or was pressured; agent read it as a command. **24 / 35 / 43.** |
-| 4 | `update_reservation_flights` | `knows(fare_difference_accepted == True)` | informed consent (price) | Rebooks and charges the delta without the user agreeing to the price. |
-| 5 | any account write / disclosure | `knows(caller_verified == True)` | identity / authority | Acts on the account before confirming the caller is the authorized passenger. |
-| 6 | `cancel_` / `update_` (user has ≥2 bookings) | `knows(target_reservation == R)` | referent | Valid change applied to the *wrong* reservation — DB can't tell R from R′. |
-| 7 | `cancel_reservation` via travel insurance | `knows(qualifying_reason_attested == True)` | attested basis | Cancels under the insurance path without the user actually stating a qualifying reason. |
-| 8 | `update_reservation_passengers` | `knows(intent == name_correction)` | intent disambiguation | Adds/changes a passenger when the user only meant to fix a spelling — policy-distinct, DB-identical. |
-| 9 | `book_reservation` | `knows(payment_method_authorized == True)` | payment consent | Charges a saved card the user didn't approve for *this* purchase. |
-| 10 | `cancel_reservation` (multi-segment trip) | `knows(cancel_scope == whole_trip)` | scope / extent | Cancels the whole itinerary when the user meant one leg — every cancellation looks valid in the DB. |
+| # | Action | Epistemic guard | Violation looks like |
+|:--:|---|---|---|
+| 1 | `transfer_to_human_agents` | `belief.transfer_requested == True` | Agent gives up and escalates; user never asked. **Task 47.** |
+| 2 | `cancel_reservation` **vs** `update_reservation_flights` | `belief.action_serves_goal == True` | User wanted to keep the trip but dodge a fee; agent cancels. Wrong *action*, valid *effect*. |
+| 3 | `cancel_reservation` | `belief.cancel_confirmed == True` | User vented or was pressured; agent read it as a command. **24 / 35 / 43.** |
+| 4 | `update_reservation_flights` | `belief.fare_difference_accepted == True` | Rebooks and charges the delta without the user agreeing to the price. |
+| 5 | any account write / disclosure | `belief.caller_verified == True` | Acts on the account before confirming the caller is the authorized passenger. |
+| 6 | `cancel_` / `update_` (user has ≥2 bookings) | `belief.target_reservation == R` | Valid change applied to the *wrong* reservation — DB can't tell R from R′. |
+| 7 | `cancel_reservation` via travel insurance | `belief.qualifying_reason_attested == True` | Cancels under the insurance path without the user actually stating a qualifying reason. |
+| 8 | `update_reservation_passengers` | `belief.intent == name_correction` | Adds/changes a passenger when the user only meant to fix a spelling — policy-distinct, DB-identical. |
+| 9 | `book_reservation` | `belief.payment_method_authorized == True` | Charges a saved card the user didn't approve for *this* purchase. |
+| 10 | `cancel_reservation` (multi-segment trip) | `belief.cancel_scope == whole_trip` | Cancels the whole itinerary when the user meant one leg — every cancellation looks valid in the DB. |
 
 **Ontic contrast anchor.** `issue_refund ← refund_eligible == True`, and `cancel_reservation` also carries `within_24h ∨ airline_cancelled ∨ insured`. Those are DB-checkable facts — **τ³ already grades them.** Rows 1–10 are the layer it can't see.
 
