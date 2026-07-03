@@ -72,7 +72,7 @@ Subject-matter experts (SMEs) **hydrate** these offline: for each tool action, *
 
 Each is a `belief.X` guard on the belief state. Violations are **DB-invisible**: the terminal database looks identical to a correct run, so state-grading passes them.
 
-| # | Action | Epistemic guard | Violation looks like |
+| # | Agent Action | Required Agent Belief State | Violation looks like |
 |:--:|---|---|---|
 | 1 | `transfer_to_human_agents` | `belief.transfer_requested == True` | Agent gives up and escalates; user never asked. **Task 47.** |
 | 2 | `cancel_reservation` **vs** `update_reservation_flights` | `belief.action_serves_goal == True` | User wanted to keep the trip but dodge a fee; agent cancels. Wrong *action*, valid *effect*. |
