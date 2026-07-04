@@ -10,11 +10,9 @@
 
 ---
 
-**AI benchmark.** We extend τ³-bench from grading only the terminal database state to also grading whether the agent got on the same page with the user before acting.
+**AI benchmark.** We extend τ³-bench from grading only the terminal database state to also grading whether the agent got on the same page with the user before acting. τ³-bench uses airline support, but the pattern is general — the same failure occurs when coding, medical, or financial agents act before they understand.
 
-**Failure pattern.** We study one broad failure pattern: acting without sufficient consent or understanding instead of asking first. τ³-bench uses airline support, but the pattern is general — the same failure occurs when coding, medical, or financial agents act before they understand.
-
-**Failure pattern example.** In our test run, Claude Haiku correctly refuses an ineligible refund, then transfers the user to a human — even though the task says *"you don't want to be transferred to another agent."* τ³-bench scores it **PASS**, despite the agent never establishing common ground about whether the user wanted the transfer. Flagging this pattern is our job.
+**Example.** In our test run, Claude Haiku correctly refuses an ineligible refund, then transfers the user to a human — even though the task says *"you don't want to be transferred to another agent."* τ³-bench scores it **PASS**, despite the agent never establishing common ground about whether the user wanted the transfer.
 
 **Research programme.** This work is part of a broader **two-phase** effort in the AI evaluation community: **Phase 1** identifies recurring failure patterns; **Phase 2** uses them to pinpoint what human domain expertise must be encoded into AI models.
 
