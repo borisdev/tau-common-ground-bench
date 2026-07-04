@@ -1,6 +1,14 @@
-# τ-same-page-bench
+# τ-CommonGround
 
-*How well does the agent get on the same page with the user?*
+*Does the agent establish sufficient common ground — enough shared understanding — before acting?*
+
+## TL;DR
+
+- **The failure.** AI agents sometimes act before resolving what they need to know — acting without common ground — producing unwanted actions that outcome-based graders can miss.
+- **What AI builders need.** Expert-authored rules specifying what an agent must understand or confirm before each consequential action.
+- **This paper's objective.** Analyze recurring failure patterns, identify the unresolved knowledge behind each bad action, and convert that gap into a focused question for domain experts to answer.
+
+---
 
 ## What is this about?
 
