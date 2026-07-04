@@ -2,9 +2,9 @@
 
 *Does the agent establish sufficient common ground — enough shared understanding — before acting?*
 
-## Motivation
-
 **This benchmark.** We extend τ³-bench from grading only the terminal database state to also grading whether the agent reached common ground before acting. τ³'s setting is airline support, but the pattern is general — coding, medical, and financial agents fail the same way.
+
+## Motivation
 
 **Failure pattern.** AI agents sometimes act before they understand — without common ground — producing unwanted actions that outcome graders were never told to check for.
 
@@ -12,7 +12,9 @@
 
 **What AI builders need.** Rules specifying what an agent must *sufficiently* understand about the user's state of mind — the part the pending action depends on — before acting.
 
-**High-level aim.** A three-phase roadmap; Phase 1 — this paper — unblocks Phases 2 and 3.
+## Roadmap
+
+A three-phase plan; Phase 1 — this paper — unblocks Phases 2 and 3.
 
 > 1. **Flag Ignorance** *(this paper)* — use evals to surface where the agent is ignorant of the user's problem.
 > 2. **Resolve Ignorance** *(Human Subject Matter Expert)* — turn each ignorance pattern into an **action-precondition rule** the grader can score. Two examples of this expert knowledge:
