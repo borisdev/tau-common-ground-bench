@@ -12,7 +12,7 @@
 
 **What AI builders need.** Rules specifying what an agent must *sufficiently* understand about the user's state of mind — the part the pending action depends on — before acting.
 
-**Our objective.** A high-level plan in three phases, where Phases 2 and 3 depend on Phase 1 — the work in this paper.
+**High-level aim.** A three-phase roadmap; Phase 1 — this paper — unblocks Phases 2 and 3.
 
 > 1. **Flag** *(this paper)* — use evals to surface where the agent is ignorant of the user's problem.
 > 2. **Resolve** *(Human Subject Matter Expert)* — turn each ignorance pattern into an **action-precondition rule** the grader can score. Two examples of this expert knowledge:
