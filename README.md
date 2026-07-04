@@ -14,11 +14,11 @@
 
 **High-level aim.** A three-phase roadmap; Phase 1 — this paper — unblocks Phases 2 and 3.
 
-> 1. **Flag** *(this paper)* — use evals to surface where the agent is ignorant of the user's problem.
-> 2. **Resolve** *(Human Subject Matter Expert)* — turn each ignorance pattern into an **action-precondition rule** the grader can score. Two examples of this expert knowledge:
+> 1. **Flag Ignorance** *(this paper)* — use evals to surface where the agent is ignorant of the user's problem.
+> 2. **Resolve Ignorance** *(Human Subject Matter Expert)* — turn each ignorance pattern into an **action-precondition rule** the grader can score. Two examples of this expert knowledge:
 >    - `transfer_to_human` requires `belief.transfer_requested == True` — the agent must *know the user asked* before escalating (task 47).
 >    - `cancel_reservation` requires `belief.cancel_confirmed == True` — the agent must *confirm intent*, not act on venting (*"this is ridiculous"*).
-> 3. **Build** *(AI builder)* — turn each rule into ambiguity-reduction logic: when the required belief is `UNKNOWN`, **ask** before acting — shrinking the gap between the agent's belief of the user's problem and the actual problem.
+> 3. **Common Ground Mechanism** *(AI builder)* — turn each rule into ambiguity-reduction logic: when the required belief is `UNKNOWN`, **ask** before acting — shrinking the gap between the agent's belief of the user's problem and the actual problem.
 
 ## Glossary
 
