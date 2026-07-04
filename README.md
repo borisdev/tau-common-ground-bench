@@ -51,7 +51,7 @@ Our eval innovation: we **instrument the unobservable** — the user's latent pr
 
 ## τ³-bench passes a real violation on airline task 47
 
-In our test run, Claude Haiku correctly refuses an ineligible refund, then transfers the user to a human — even though the task states *"you don't want to be transferred to another agent."* The τ³-bench grader scores it `PASS` anyway — a **silent false-pass**: the *don't-transfer* requirement is only in the free-text `task_instructions`, not in the structured criteria the grader checks. ([root cause →](#root-cause-of-the-false-pass-task-instructions--grading-criteria-drift))
+The `PASS` above is a **silent false-pass**: the *don't-transfer* requirement lives only in the free-text `task_instructions`, not in the structured criteria the grader checks. ([root cause →](#root-cause-of-the-false-pass-task-instructions--grading-criteria-drift))
 
 ## ProblemSpec and ProblemSpecBelief
 
