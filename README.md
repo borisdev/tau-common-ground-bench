@@ -41,7 +41,7 @@ Our eval innovation: we **instrument the unobservable** — the user's latent pr
 - **Common ground / common grounding** — the shared understanding two parties create, repair, and update in dialogue; an established term (Clark 1991; [Udagawa & Aizawa, AAAI 2019](https://arxiv.org/abs/1907.03399)). The concept behind the preflight check — the agent reaches *enough* shared understanding before acting (Clark's **grounding criterion**, *sufficient for current purposes*).
 - **Ontic predicate** — a fact about the world, resolvable by a **database query** (e.g., `refund_eligible` — check the fare rules). τ³ already grades these.
 - **Epistemic predicate** — a fact about what the *agent knows*. **No DB query can resolve it** — the agent must **probe the user** (ask) to reduce the ambiguity in its belief. *Why the word earns its keep (counterfactual):* drop "epistemic" and "precondition" defaults to **ontic** — you query the DB, see nothing wrong, and pass task 47. "Epistemic" is the intervention: it redirects the check from the world to the agent's belief. Without the word, the failure is invisible.
-- **`StructuredUserRequirements`** — the typed, checkable representation of the user's action-relevant requirements (goal, preferences, authorizations, constraints), lifted from τ³'s `task_instructions` prose with a `source_quote` for each. The grader sees it; the agent never does. Scoped to what *this* interaction's actions require, not everything about the user. (See it built in *Making τ³'s implicit requirements explicit* below.)
+- **`StructuredUserRequirements`** — the typed, checkable representation of the user's action-relevant requirements (goal, preferences, authorizations, constraints), lifted from τ³'s `task_instructions` prose with a `source_quote` for each. The grader sees it; the agent never does. Scoped to what *this* interaction's actions require, not everything about the user. (See the patch in *The patch: make the implicit requirement explicit* below.)
 - **Agent belief state** *(later phase)* — the agent's task-scoped model of the user over the fields the pending action depends on, each slot `UNKNOWN` until resolved by probing. Tracking whether the agent *resolves* each requirement before acting is a deferred agent-belief-tracking layer; the paired re-scoring experiment needs only the grader's view. (Belief-state / dialogue-state tracking — Young et al. 2013; user modeling — Fischer 2001.)
 - **Ambiguity** — the gap between the true `StructuredUserRequirements` and the agent's belief state over the fields required to safely execute the pending action. (Belief-side — *not* τ³'s *ambiguous instructions*; see below.)
 - **Epistemic precondition** — an epistemic predicate an action requires the agent to *know* (resolve) before it may fire. Grounded prior art: knowledge preconditions (Moore 1985), knowledge-based programs (Fagin et al. 1995). [details →](docs/epistemic-preconditions.md)
@@ -59,9 +59,19 @@ Deeper theory and full prior art (POMDP belief states, assistance games, epistem
 
 </details>
 
-## Making τ³'s implicit requirements explicit
+## The patch: make the implicit requirement explicit
 
-τ³ buries the user's requirements in one prose field, `task_instructions`, and the grader checks only a structured *subset* of the scenario — so a requirement left in the prose is **invisible to grading**. τ-PreflightCheck lifts it into an **explicit, typed** field the grader checks — one optional field, `user_preflight_requirements`, added to τ³'s own `StructuredUserInstructions` (the prose stays byte-for-byte). Watch the *same* requirement move from implicit prose (deleted from grading) to explicit type (now graded):
+τ-PreflightCheck is a **surgical patch** to τ³: one optional field, plus a grader that reads it. The entire schema change to τ³'s own `StructuredUserInstructions` —
+
+```diff
+  # src/tau2/data_model/tasks.py
+  class StructuredUserInstructions(BaseModel):
+      ...
+      task_instructions: str            # the user's requirements — buried in prose, grader-invisible
++     user_preflight_requirements: StructuredUserRequirements | None = None   # NEW — typed, grader-visible
+```
+
+Optional (`default None`) → every existing τ³ task still loads, and the simulator prose stays byte-for-byte. Two more files complete the surface: a leaf module [`structured_requirements.py`](https://github.com/borisdev/tau-preflight-check-bench/blob/main/src/tau2/data_model/structured_requirements.py) (the types) and [`StructuredRequirementsEvaluator`](https://github.com/borisdev/tau-preflight-check-bench/blob/main/src/tau2/evaluator/structured_requirements_evaluator.py) (reads the field). The rest is the worked case — **task 47** — watching the *same* requirement move from implicit prose to the explicit field:
 
 **Implicit — buried in prose.** Task 47's `task_instructions`, verbatim ([source ↗](https://github.com/borisdev/tau-preflight-check-bench/blob/591a7a5474666b90634eb9b1ec51371b889bc1db/data/tau2/domains/airline/tasks.json#L3408-L3416)). The **red** line is a stated requirement τ³'s criteria never check — effectively **deleted** from what's graded:
 
@@ -77,7 +87,7 @@ Deeper theory and full prior art (POMDP belief states, assistance games, epistem
 }
 ```
 
-**Explicit — lifted into a typed, gradeable field** (`user_preflight_requirements`, one optional field we add to τ³'s `StructuredUserInstructions`), with the *correct* semantics and provenance (each rule traces to its `source_quote` — the red line above):
+**Explicit — we populate the new field** for task 47: the same requirement, typed, with the *correct* semantics and provenance (each rule traces to its `source_quote` — the red line above):
 
 ```diff
 + StructuredUserRequirements(
@@ -99,7 +109,7 @@ Deeper theory and full prior art (POMDP belief states, assistance games, epistem
 
 Two semantics a looser encoding gets wrong: **`ConsentStatus.DENIED`** means the user *explicitly refused* — not merely that no transfer was requested; and cancellation is a **conditional** authorization — the *world* decides whether `full_refund_available` holds, so `refund_eligible` is a world fact, not the user's requirement. Every requirement carries a `source_quote`, so we can prove we **made an existing stated rule gradeable, not invented one.**
 
-**Paired re-scoring — same trajectory, two graders.** Adding the optional `user_preflight_requirements` field changes nothing the agent sees or the simulator says, so we score the *same recorded trajectory* two ways; any verdict difference is attributable to **what the grader can represent, not to a changed conversation**:
+**The result reads like a test going red on a real bug** — same trajectory, two graders. Adding the optional field changes nothing the agent sees or the simulator says, so any verdict difference is **what the grader can represent, not a changed conversation**:
 
 ```text
 same task · same simulator prose · same trajectory · same agent output
