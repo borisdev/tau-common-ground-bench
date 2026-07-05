@@ -59,23 +59,19 @@ Deeper theory and full prior art (POMDP belief states, assistance games, epistem
 
 </details>
 
-## Structuring τ³'s own requirements → `StructuredUserInstructionsV2`
+## Making τ³'s implicit requirements explicit → `StructuredUserInstructionsV2`
 
-τ³ already gives each simulated user a semi-structured [`StructuredUserInstructions`](https://github.com/borisdev/tau-preflight-check/blob/591a7a5474666b90634eb9b1ec51371b889bc1db/src/tau2/data_model/tasks.py#L15-L48). But its `task_instructions` field is overloaded prose — it mixes goal, constraints, consent, and simulator behavior, and the grader checks only a subset. So we add **`StructuredUserInstructionsV2`**: the simulator prose stays **byte-for-byte unchanged**, and the user's action-relevant requirements are *also* represented as typed, checkable fields.
+τ³ buries the user's requirements in one overloaded prose field, `task_instructions`, and the grader checks only a structured *subset* of the scenario — so any requirement left in the prose is **invisible to grading**. τ-PreflightCheck adds **exactly one field** that turns those buried requirements into an **explicit, typed, grader-visible** artifact — the intermediate object the new grade depends on:
 
-```text
-UserScenario
-├── persona
-└── instructions: StructuredUserInstructionsV2
-    ├── domain
-    ├── reason_for_call
-    ├── known_info
-    ├── unknown_info
-    ├── task_instructions          ← unchanged simulator prose
-    └── structured_requirements    ← new, grader-visible typed requirements
+```diff
+  StructuredUserInstructions          # what τ³ ships
+    domain, reason_for_call, known_info, unknown_info
+    task_instructions: str            # ← the requirements live here, in prose — the grader can't see them
++   structured_requirements: StructuredUserRequirements
++                                     # ← τ-PreflightCheck adds this: the same requirements, made explicit & grader-visible
 ```
 
-For task 47, the user's `task_instructions` — the requirements, broken out (the real field is one prose string; [source ↗](https://github.com/borisdev/tau-preflight-check/blob/591a7a5474666b90634eb9b1ec51371b889bc1db/data/tau2/domains/airline/tasks.json#L3408-L3416)). The line in **red** is a real, stated requirement that τ³'s structured criteria never check — effectively **deleted** from what gets graded:
+**The requirement that's implicit today.** Task 47's `task_instructions`, verbatim ([source ↗](https://github.com/borisdev/tau-preflight-check/blob/591a7a5474666b90634eb9b1ec51371b889bc1db/data/tau2/domains/airline/tasks.json#L3408-L3416)) — the requirements are buried in one prose string. The line in **red** is a real, stated requirement τ³'s structured criteria never check — effectively **deleted** from what's graded:
 
 ```diff
 {
@@ -89,7 +85,7 @@ For task 47, the user's `task_instructions` — the requirements, broken out (th
 }
 ```
 
-We lift those stated requirements into typed `structured_requirements` — with the *correct* semantics and full provenance:
+**Made explicit** — we lift that buried requirement into typed `structured_requirements`, the intermediate artifact the grader checks, with the *correct* semantics and full provenance:
 
 ```python
 StructuredUserRequirements(
