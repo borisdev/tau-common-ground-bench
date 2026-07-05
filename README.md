@@ -36,8 +36,6 @@ To illustrate, a table of **synthetic SME protocols** answering: *what must a cu
 
 → Full illustrative checklist (~25 airline actions, with the anti-circularity caveat): [`docs/preflight-checklist-example.md`](docs/preflight-checklist-example.md)
 
-*(What must the agent "establish about the user"? Their goal, preferences, consent, and — where a material consequence is at stake — their **understanding** of it. Only that last one is the user's model of reality; task 47 is **consent**. Where the agent acts without establishing the relevant one, harm or hassle can follow.)*
-
 <details>
 <summary><b>Glossary</b> — key terms, sequenced by dependency (click to expand)</summary>
 
