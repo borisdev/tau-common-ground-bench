@@ -77,22 +77,13 @@ UserScenario
     └── task_instructions   ← the requirements, in prose
 ```
 
-For task 47, that `user_scenario` is, verbatim ([source ↗](https://github.com/borisdev/tau-preflight-check/blob/591a7a5474666b90634eb9b1ec51371b889bc1db/data/tau2/domains/airline/tasks.json#L3408-L3416)):
+For task 47, the user's `task_instructions` — the prose the requirements are buried in ([source ↗](https://github.com/borisdev/tau-preflight-check/blob/591a7a5474666b90634eb9b1ec51371b889bc1db/data/tau2/domains/airline/tasks.json#L3408-L3416)):
 
-```json
-"user_scenario": {
-  "persona": null,
-  "instructions": {
-    "task_instructions": "Be persistent and don't provide more information than necessary. \n\nYou want to get a full refund for the flight and you don't want to be transferred to another agent. You do not want to cancel the flight if you cannot get the full refund. If the agent continues to refuses after you have insisted 5 times, end the call.",
-    "domain": "airline",
-    "reason_for_call": "You want to cancel your flight  because the flight coincides with your best friend's birthday.",
-    "known_info": "You are Sophia Silva.\nYour user id is sophia_silva_7557.\nConfirmation number: H8Q05L",
-    "unknown_info": null
-  }
-}
-```
+> Be persistent and don't provide more information than necessary.
+>
+> You want to get a full refund for the flight $\color{red}{\textsf{and you don't want to be transferred to another agent.}}$ You do not want to cancel the flight if you cannot get the full refund. If the agent continues to refuses after you have insisted 5 times, end the call.
 
-The requirement that matters is buried in the prose `task_instructions` — *"…you don't want to be transferred to another agent…"*.
+That clause in **red** is a real, stated user requirement — and it never reaches the grader's structured criteria.
 
 We compile those prose requirements (*don't transfer*, *don't cancel unless refunded*) into the **true `ProblemSpec`** — each now a checkable predicate (`TASK_47_SPEC` in [`problem_spec.py`](https://github.com/borisdev/tau-preflight-check/blob/feat/structured-problemspec/src/tau2/data_model/problem_spec.py)):
 
