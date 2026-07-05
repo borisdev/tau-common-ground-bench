@@ -10,7 +10,7 @@ A precondition is **ontic** if it's a fact about the world (a state-grader can c
 
 **Ontic contrast anchor.** `issue_refund ← refund_eligible == True`, and `cancel_reservation` also carries `within_24h ∨ airline_cancelled ∨ insured`. Those are DB-checkable facts — **τ³ already grades them.** The epistemic guards in the README's table are the layer it can't see.
 
-The airline pilot falls out of this split: the three FAILs τ³ already catches (24 / 35 / 43) are ontic (a wrongful cancellation *changes* the DB); the one detection the belief layer *adds* (task 47) is epistemic (the transfer leaves the DB unchanged).
+The airline pilot falls out of this split: the three FAILs τ³ already catches (24 / 35 / 43) are ontic (a wrongful cancellation *changes* the DB); the one detection the structured-requirements grade *adds* (task 47) is epistemic (the transfer leaves the DB unchanged).
 
 ## One artifact, two uses
 
@@ -30,21 +30,21 @@ A single row is not one fact; it decomposes into three pieces the written policy
 | Candidate fix | Why it works | Expert input needed |
 |---|---|---|
 | Default every belief slot to `UNKNOWN`; add a system invariant — *never transfer without an explicit YES*. | The agent can't treat an unresolved slot as consent; escalation now requires positive evidence. | the **invariant** |
-| In the `ProblemSpec`, declare that a `transfer` requires `transfer_requested == True`. | *Acting while `UNKNOWN`* becomes a checkable violation, not a judgment call. | the **action precondition** |
+| In `StructuredUserRequirements`, declare that a `transfer` requires `transfer_requested == True`. | *Acting while `UNKNOWN`* becomes a checkable violation, not a judgment call. | the **action precondition** |
 | Grader penalty when an escalating action fires under `UNKNOWN`. | Lets the eval weight how severe the violation is. | the **severity** |
 
-Because the `ProblemSpec` is versioned, executable **policy-as-code**, each addition is an auditable record of what *correct* means as policy evolves. (This *invariant / action-precondition / severity* decomposition is **Design by Contract** — Meyer's `require`/`ensure`/`invariant` — applied per tool; the **severity** weight is the FMEA severity. Prior art: [`FRAMING.md`](../FRAMING.md).)
+Because `StructuredUserRequirements` is versioned, executable **policy-as-code** (every constraint carries a `source_quote`), each addition is an auditable record of what *correct* means as policy evolves. (This *invariant / action-precondition / severity* decomposition is **Design by Contract** — Meyer's `require`/`ensure`/`invariant` — applied per tool; the **severity** weight is the FMEA severity. Prior art: [`FRAMING.md`](../FRAMING.md).)
 
 ## Systems analogy — three-valued ABAC
 
-Mechanically this is **attribute-based access control (ABAC) over the belief state**, with `ProblemSpecBelief` slots as the attributes and the SME guards as the policy. The lookup before each tool call is the policy decision point.
+Mechanically this is **attribute-based access control (ABAC) over the belief state**, with the agent's belief-state slots as the attributes and the SME guards as the policy. The lookup before each tool call is the policy decision point. (The belief-state slots belong to the deferred agent-belief-tracking layer; the runtime gate below is future work.)
 
 Classic ABAC is **two-valued** (allow / deny) and assumes every attribute is *known*. Because a slot can be `UNKNOWN`, ours is **three-valued** — **allow / deny / ask** — and `UNKNOWN` triggers a clarifying question (a **sensing action** — Scherl & Levesque 1993 — that resolves the slot, then re-evaluates) rather than a denial. That third outcome is the whole contribution: the extension no ABAC engine has, and exactly what the belief state buys you.
 
 ## Runtime loop
 
 ```
-user turn → update ProblemSpecBelief (fill slots from dialogue)
+user turn → update the belief state (fill slots from dialogue)
         ↓
 agent selects tool T
         ↓
@@ -67,7 +67,7 @@ The benchmark is the discovery mechanism: every false-pass it surfaces is a guar
 
 ## SME-authored policy: what ambiguity to resolve before acting  (moved from README)
 
-**Definition.** *Epistemic* means **about what the agent knows** — as opposed to *ontic*, about what is **true in the world**. So an *epistemic precondition* is a rule that says **resolve the ambiguity on slot X before taking action Y** — a fact the agent must *know* (its `ProblemSpecBelief` slot resolved, not `UNKNOWN`), not merely a fact that must be *true*. Firing an action while a required slot is still `UNKNOWN` is acting under unresolved ambiguity — the violation.
+**Definition.** *Epistemic* means **about what the agent knows** — as opposed to *ontic*, about what is **true in the world**. So an *epistemic precondition* is a rule that says **resolve the ambiguity on slot X before taking action Y** — a fact the agent must *know* (its belief-state slot resolved, not `UNKNOWN`), not merely a fact that must be *true*. Firing an action while a required slot is still `UNKNOWN` is acting under unresolved ambiguity — the violation.
 
 Subject-matter experts (SMEs) **hydrate** these offline: for each tool action, *which slots must be grounded, to what value, and how severe if skipped.* That tacit expertise is the part the written policy doesn't contain and a lab can't self-serve. At runtime the agent **consults** them before firing a tool: where a required slot is `UNKNOWN`, it **asks** instead of guessing.
 

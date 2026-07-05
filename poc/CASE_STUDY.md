@@ -1,6 +1,6 @@
-# Task 47: the AI — and the grader — both missed "no escalate" in the problem spec
+# Task 47: the AI — and the grader — both missed "don't transfer me" in the task instructions
 
-The task's hidden problem spec literally says *"you don't want to be transferred to another agent."* The **agent's belief state dropped that requirement** (it transferred anyway); the **grader never checked it** (it scored a pass). Same missed item, two failures — and only the belief trace catches it.
+The task's `task_instructions` literally says *"you don't want to be transferred to another agent."* The **agent transferred anyway**; the **grader never checked the requirement** (it scored a pass). Lifting that stated requirement into a typed `StructuredUserRequirements` constraint is what catches it under paired re-scoring. (The turn-by-turn belief view below is the deferred agent-belief lens — useful for localizing *where* the agent went wrong, but the gradeable detection needs only the grader's view.)
 
 ---
 
@@ -8,7 +8,7 @@ The task's hidden problem spec literally says *"you don't want to be transferred
 
 These are the literal JSON objects the τ³ harness loads for this task. Everything downstream — the conversation, the grade, the belief trace — derives from these.
 
-### a) The Task / problem spec → [`data/tau2/domains/airline/tasks.json` L3401-3440](../data/tau2/domains/airline/tasks.json#L3401-L3440)
+### a) The Task / user scenario → [`data/tau2/domains/airline/tasks.json` L3401-3440](../data/tau2/domains/airline/tasks.json#L3401-L3440)
 
 ```json
 {
@@ -35,7 +35,7 @@ These are the literal JSON objects the τ³ harness loads for this task. Everyth
 }
 ```
 
-- **The dropped requirement** lives in `task_instructions`: *"you don't want to be transferred to another agent."* This is the `ProblemSpec` slot the agent's belief never honored.
+- **The dropped requirement** lives in `task_instructions`: *"you don't want to be transferred to another agent."* This is the requirement we lift into a typed `StructuredUserRequirements` constraint that the agent violated.
 - **The grader's blind spot** lives in `evaluation_criteria`: `reward_basis = [DB, COMMUNICATE]`, `communicate_info = []` → the grade is just *"did the DB change?"* The transfer-aversion is **nowhere** in what's scored. (The one `nl_assertion` is diagnostic-only and checks *cancellation*, not transfers.)
 
 ### b) Initial world state — the reservation → [`data/tau2/domains/airline/db.json` L148374-148407](../data/tau2/domains/airline/db.json#L148374-L148407)
@@ -110,7 +110,7 @@ A human transfer **doesn't change the database.** The grade only watches the dat
 
 2. **A failure invisible to outcome grading.** The agent passes τ³'s reward, yet in deployment this behavior escalates policy-denial conversations that should end at the denial — against users who explicitly ask not to be transferred. Outcome-only grading cannot surface it.
 
-3. **Detection is separable from the fix.** Encoding the requirement as a `ProblemSpec` constraint makes it gradeable (§below). Whether the underlying behavior is best corrected by a prompt rule or requires additional training data is a separate, testable question — add the rule and re-run; if the behavior persists, it is a data problem, not a prompt one.
+3. **Detection is separable from the fix.** Lifting the requirement into a typed `StructuredUserRequirements` constraint makes it gradeable (§below). Whether the underlying behavior is best corrected by a prompt rule or requires additional training data is a separate, testable question — add the rule and re-run; if the behavior persists, it is a data problem, not a prompt one.
 
 ## 5. Provenance
 

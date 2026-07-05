@@ -10,7 +10,7 @@ We ran Claude Haiku on τ³ airline task 47 and found a grading failure:
 - **The user's latent requirement:** *don't transfer me to another agent* (stated in the task).
 - **What the agent did:** correctly refused an ineligible refund — then **transferred the user to a human anyway**, never confirming they wanted it.
 - **What τ³-bench scored:** **PASS** — the transfer left the database unchanged, and the *don't-transfer* rule sits in free-text `task_instructions`, not in the grader's structured criteria.
-- **The problem:** a real, stated user requirement was violated — invisibly. A **silent false-pass**. ([root cause →](#root-cause-of-the-false-pass-task-instructions--grading-criteria-drift))
+- **The problem:** a real, stated user requirement was violated — invisibly. A **silent false-pass**. ([root cause: `task_instructions` ↔ grading-criteria drift →](docs/pilot-details.md#root-cause-task_instructions--grading-criteria-drift))
 
 **How surfacing these failure patterns might help AI quality in customer-service.** These failures turn into concrete questions for human subject-matter experts: *for a given action, what must an AI agent sufficiently understand about its user's state of mind before committing — so it doesn't harm or inconvenience the user?* To illustrate, a table of **synthetic SME answers** to the question — *what must the customer-service agent establish about the customer's state of mind before taking an action?*
 
@@ -40,11 +40,11 @@ Our eval innovation: we **instrument the unobservable** — the user's latent pr
 - **Common ground / common grounding** — the shared understanding two parties create, repair, and update in dialogue; an established term (Clark 1991; [Udagawa & Aizawa, AAAI 2019](https://arxiv.org/abs/1907.03399)). The concept behind the preflight check — the agent reaches *enough* shared understanding before acting (Clark's **grounding criterion**, *sufficient for current purposes*).
 - **Ontic predicate** — a fact about the world, resolvable by a **database query** (e.g., `refund_eligible` — check the fare rules). τ³ already grades these.
 - **Epistemic predicate** — a fact about what the *agent knows*. **No DB query can resolve it** — the agent must **probe the user** (ask) to reduce the ambiguity in its belief. *Why the word earns its keep (counterfactual):* drop "epistemic" and "precondition" defaults to **ontic** — you query the DB, see nothing wrong, and pass task 47. "Epistemic" is the intervention: it redirects the check from the world to the agent's belief. Without the word, the failure is invisible.
-- **`ProblemSpec`** — the true, typed shape of the user's problem (ground truth; the agent never sees it); fields are ontic or epistemic. Problem-centric and scoped: the **action-relevant, checkable projection of the user model** — what *this* interaction's actions require, not everything about the user. [see it built →](#problemspec-and-problemspecbelief)
-- **`ProblemSpecBelief`** — the agent's **belief state**: its task-scoped model of the user over the fields the pending action depends on, each slot `UNKNOWN` until resolved by probing. (Belief-state / dialogue-state tracking — Young et al. 2013; user modeling — Fischer 2001.)
-- **Ambiguity** — the gap between the true `ProblemSpec` and the agent's `ProblemSpecBelief` over the fields required to safely execute the pending action. (Belief-side — *not* τ³'s *ambiguous instructions*; see below.)
+- **`StructuredUserRequirements`** — the typed, checkable representation of the user's action-relevant requirements (goal, preferences, authorizations, constraints), lifted from τ³'s `task_instructions` prose with a `source_quote` for each. The grader sees it; the agent never does. Scoped to what *this* interaction's actions require, not everything about the user. (See it built in *Structuring τ³'s own requirements* below.)
+- **Agent belief state** *(later phase)* — the agent's task-scoped model of the user over the fields the pending action depends on, each slot `UNKNOWN` until resolved by probing. Tracking whether the agent *resolves* each requirement before acting is a deferred agent-belief-tracking layer; the paired re-scoring experiment needs only the grader's view. (Belief-state / dialogue-state tracking — Young et al. 2013; user modeling — Fischer 2001.)
+- **Ambiguity** — the gap between the true `StructuredUserRequirements` and the agent's belief state over the fields required to safely execute the pending action. (Belief-side — *not* τ³'s *ambiguous instructions*; see below.)
 - **Epistemic precondition** — an epistemic predicate an action requires the agent to *know* (resolve) before it may fire. Grounded prior art: knowledge preconditions (Moore 1985), knowledge-based programs (Fagin et al. 1995). [details →](docs/epistemic-preconditions.md)
-- **Ignorance** *(of the user — a missing field)* — the `ProblemSpec` doesn't even contain the user-state dimension this action needs, so no one knows to check it: a **false negative** on the user's state of mind. *We don't know the shape.* Fixing it needs a **human expert** to author the missing field (Phase 2 — *Resolve Ignorance*).
+- **Ignorance** *(of the user — a missing field)* — `StructuredUserRequirements` doesn't even contain the user-state dimension this action needs, so no one knows to check it: a **false negative** on the user's state of mind. *We don't know the shape.* Fixing it needs a **human expert** to author the missing field (Phase 2 — *Resolve Ignorance*).
 - **Underspecification** *(cause)* — the policy-side of ignorance: an action's epistemic preconditions were never authored, so the grader can't score them.
 - **Epistemic / belief ambiguity** *(a known field with an unknown value)* — the field **exists** in the shape but its value is `UNKNOWN` in the agent's belief, and the agent acts without resolving it. *We know the shape, not the value* — the agent can fix this at runtime by **asking** (Phase 3). Distinguish from **ignorance** (the field is missing entirely) and from τ³'s ambiguity ↓.
 - **Ambiguous instructions** *(τ³ — not ours)* — an underspecified *task prompt* that makes the **simulated user** behave nondeterministically across trials; τ³ fixed these ([τ³ task-fixes](https://taubench.com/blog/tau3-task-fixes.html)). That's ambiguity in the **task authoring** (author ↔ simulator); *epistemic/belief ambiguity* is in the **agent's belief** (agent ↔ user) and survives even a τ³-clean task like 47.
@@ -133,15 +133,11 @@ The preflight check targets two:
 
 The first funds the second: proving agents skip *stated* requirements opens the concrete question of what a complete per-action preflight checklist must contain.
 
-## Root cause of the false pass: task instructions ↔ grading criteria drift
-
-`task_instructions` and `evaluation_criteria` are separate hand-authored artifacts, so they drift — task 47 is where the scenario forbids the transfer but the graded criteria don't. A single typed requirement spec (V2) compiled to both closes the drift by construction. → [`PROBLEM_BELIEF_SPEC.md`](PROBLEM_BELIEF_SPEC.md)
-
 ---
 
-## Pilot: 6 airline tasks
+## Pilot study — we ran our new grader on 6 airline tasks
 
-**A small proof-of-concept, not a measured rate.** We ran the preflight check on **6 τ³ airline tasks** to see how often τ³'s own grader misses a latent user requirement.
+**A small proof-of-concept, not a measured rate.** We re-scored **6 τ³ airline tasks** to see how often τ³'s own grader misses a latent user requirement.
 
 The **DB grade** is τ³'s authoritative verdict — we recompute it by replaying the agent's recorded tool calls against τ³'s ground-truth reference actions (using the real τ³ tools). Our added **belief / constraint** check then flags requirements that DB grade can't see.
 
@@ -156,7 +152,7 @@ The **DB grade** is τ³'s authoritative verdict — we recompute it by replayin
 
 **Reading the table.** Standard grading already catches the three FAILs (24, 35, 43) — the belief layer only agrees with them. It adds one verdict the grade misses: task 47. Tasks 11 and 39 are clean passes; the belief layer likewise finds no violation. (Whether each *finding* held up under verification is a separate axis — see the note below.)
 
-**How the flip works, and why we trust the findings.** Task 47's `reward_basis` only checks the DB, so the transfer is invisible → PASS; encoding *don't transfer* as a `ProblemSpec` constraint flips it to **FAIL**. And the analyzer's findings are **independently verified** — a deterministic re-run rejected **3 of 6** first-pass findings (ungrounded/fabricated quotes), leaving the three whose evidence holds (24, 35, 47). Full mechanics + verification detail: [`docs/pilot-details.md`](docs/pilot-details.md).
+**How the flip works, and why we trust the findings.** Task 47's `reward_basis` only checks the DB, so the transfer is invisible → PASS; lifting *don't transfer* into a typed `StructuredUserRequirements` constraint flips it to **FAIL**. And the analyzer's findings are **independently verified** — a deterministic re-run rejected **3 of 6** first-pass findings (ungrounded/fabricated quotes), leaving the three whose evidence holds (24, 35, 47). Full mechanics + verification detail: [`docs/pilot-details.md`](docs/pilot-details.md).
 
 ---
 
@@ -167,7 +163,7 @@ The **DB grade** is τ³'s authoritative verdict — we recompute it by replayin
 | Run | [`poc/run_airline.py`](poc/run_airline.py) | Haiku agent vs. Sonnet user-sim on the real τ³ airline tools + policy; records the trajectory and recomputes the DB grade. |
 | Extract | [`poc/analyze_beliefs.py`](poc/analyze_beliefs.py) | Sonnet observer emits a per-task belief summary + cited evidence (first-pass, unverified). |
 | Verify | [`poc/verify_findings.py`](poc/verify_findings.py) | Deterministic quote/action grounding + independent grade recompute; rejects ungrounded findings. |
-| Constraint grade | [`src/tau2/evaluator/constraint_evaluator.py`](https://github.com/borisdev/tau-preflight-check/blob/feat/structured-problemspec/src/tau2/evaluator/constraint_evaluator.py) *(branch)* | Grades a trajectory against a `ProblemSpec`'s typed constraints. |
+| Structured-requirements grade | `StructuredRequirementsEvaluator` — [branch `feat/structured-problemspec`](https://github.com/borisdev/tau-preflight-check/tree/feat/structured-problemspec) | Grades a trajectory against the task's `StructuredUserRequirements` (typed constraints with source-quote provenance). |
 
 Data artifacts: [`poc/trajectories.json`](poc/trajectories.json), [`poc/verified_findings.json`](poc/verified_findings.json), readable transcripts in [`poc/traces/`](poc/traces/).
 
@@ -177,11 +173,11 @@ Reproduce: `run_airline.py` → `analyze_beliefs.py` → `verify_findings.py`.
 
 ## Implementation status (issue #1)
 
-The `ProblemSpec` / `ProblemSpecBelief` types (`render_prompt`) and a `ConstraintEvaluator` — the first slice that flips task 47 `PASS → FAIL` — are on branch [`feat/structured-problemspec`](https://github.com/borisdev/tau-preflight-check/tree/feat/structured-problemspec); the full field list and design are in [`PROBLEM_BELIEF_SPEC.md`](PROBLEM_BELIEF_SPEC.md). The `ProblemSpec` is the shared source for the user-sim prompt, the grader's constraint checks, and the belief-comparison target — but it is **not** given to the agent, so the belief measurement is not leaked. Tracked in [issue #1](https://github.com/borisdev/tau-preflight-check/issues/1).
+The `StructuredUserInstructionsV2` / `StructuredUserRequirements` types and a `StructuredRequirementsEvaluator` — the first slice that flips task 47 `PASS → FAIL` — are on branch [`feat/structured-problemspec`](https://github.com/borisdev/tau-preflight-check/tree/feat/structured-problemspec); the related belief-layer design (a deferred later phase) is in [`PROBLEM_BELIEF_SPEC.md`](PROBLEM_BELIEF_SPEC.md). `StructuredUserInstructionsV2` preserves the original `task_instructions` prose byte-for-byte and adds the typed `structured_requirements` the grader checks — but that typed field is **not** given to the agent, so the paired re-scoring measurement is not leaked. Tracked in [issue #1](https://github.com/borisdev/tau-preflight-check/issues/1).
 
 ## What about τ²-Bench / dual control?
 
-τ²'s contribution was **dual control** — the user-simulator can also act on the shared world (a parallel axis: *who can act*). This layer is orthogonal — *what the grader can observe* (the agent's belief vs. the problem spec). They compose, but this work does not depend on dual control: the pilot uses the **airline** domain, which is single-control. We fork τ³ for its fixed tasks and structured task schema; the original τ-bench is deprecated.
+τ²'s contribution was **dual control** — the user-simulator can also act on the shared world (a parallel axis: *who can act*). This layer is orthogonal — *what the grader can observe* (the user's stated requirements vs. τ³'s graded criteria). They compose, but this work does not depend on dual control: the pilot uses the **airline** domain, which is single-control. We fork τ³ for its fixed tasks and structured task schema; the original τ-bench is deprecated.
 
 ## Repository map
 
@@ -196,6 +192,6 @@ The `ProblemSpec` / `ProblemSpecBelief` types (`render_prompt`) and a `Constrain
 ## Limitations
 
 - Six tasks, one agent model, airline (single-control) only. This is a pilot, not a measured rate.
-- The belief observer currently emits a per-task summary at a few points, not a serialized per-turn state; a numeric belief-vs-spec convergence curve is future work and requires the structured `ProblemSpec` wired into the live run.
-- The `ConstraintEvaluator` demonstration runs against the recorded trajectory; wiring it into the live user-simulator and registering it as a `reward_basis` component is the remaining work in issue #1.
+- Agent-side belief tracking is a deferred later phase: the observer currently emits a per-task summary at a few points, not a serialized per-turn state, and a numeric belief-vs-requirements convergence curve remains future work. The paired re-scoring experiment does not depend on it.
+- The `StructuredRequirementsEvaluator` demonstration runs against the recorded trajectory (paired re-scoring); wiring it into the live user-simulator and registering it as a `reward_basis` component is the remaining work in issue #1.
 - DB grades are recomputed against τ³'s real `reward_basis`; the task-47 pass is verified against that spec.

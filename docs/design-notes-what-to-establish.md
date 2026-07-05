@@ -46,7 +46,7 @@ Why this design works:
 
 - **Bounded action** keeps it answerable — not "how should agents behave in general" (unbounded), but "before *this tool call*, what must be true" (finite, concrete).
 - **The harm anchor** (*"so we don't hurt the user"*) does triple duty: **anti-circularity** (a check earns its place by the harm it prevents, not by being invented), **prioritization** (author high-harm checks first), and it yields the *"example failure caught"* column for free.
-- **SME prose → LLM → checklist.** SMEs carry tacit domain knowledge but shouldn't hand-write predicates; an LLM converts their prose into `belief.X == True` predicates. This mirrors the task-47 move (prose `task_instructions` → checkable `ProblemSpec`), just sourced from an expert instead of a task.
+- **SME prose → LLM → checklist.** SMEs carry tacit domain knowledge but shouldn't hand-write predicates; an LLM converts their prose into `belief.X == True` predicates. This mirrors the task-47 move (prose `task_instructions` → checkable `StructuredUserRequirements`), just sourced from an expert instead of a task.
 - **Verification loop.** Don't trust the LLM's structuring — verify the generated checklist faithfully captures the SME's intent (same rigor as `poc/verify_findings.py`).
 - **Anchor to the domain policy.** Prefer checks traceable to the airline policy document the agent is already given, over invented ones (keeps Pattern A honest).
 

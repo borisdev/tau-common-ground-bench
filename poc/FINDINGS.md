@@ -21,7 +21,7 @@ Standard grading already catches 24, 35, 43. The belief/constraint layer adds on
 
 ## Task 47 — the added detection
 
-`reward_basis = [DB, COMMUNICATE]`, `communicate_info = []` → the grade is "did the DB change?" The agent refused the ineligible refund (no DB change → PASS), then called `transfer_to_human_agents` although the task instructions state *"you don't want to be transferred to another agent"* and no user request for a transfer preceded it. Encoding the requirement as a `ProblemSpec` constraint and grading it:
+`reward_basis = [DB, COMMUNICATE]`, `communicate_info = []` → the grade is "did the DB change?" The agent refused the ineligible refund (no DB change → PASS), then called `transfer_to_human_agents` although the task instructions state *"you don't want to be transferred to another agent"* and no user request for a transfer preceded it. Lifting the requirement into a typed `StructuredUserRequirements` constraint and grading it:
 
 ```
 DB grade (τ³ today) ............. PASS   (reward=1; DB unchanged)
@@ -61,7 +61,7 @@ The disqualifying facts were already present in the conversation, so this is pol
 
 ## Glossary
 
-- **Belief state** — the agent's running estimate of the user's problem, inferred from the conversation. Represented as `ProblemSpecBelief`.
+- **Belief state** *(later phase)* — the agent's running estimate of the user's problem, inferred from the conversation. Agent-side belief tracking is a deferred layer; the paired re-scoring here needs only the grader's view.
 - **DB grade** — τ³'s reward for the task, recomputed by replaying the agent's tool calls against the ground-truth reference actions with the real τ³ tools.
-- **Constraint** — a typed requirement in a `ProblemSpec` (e.g. "no transfer without explicit user request") that a `ConstraintEvaluator` grades directly.
+- **Constraint** — a typed requirement in `StructuredUserRequirements` (e.g. "no transfer without explicit user request") that a `StructuredRequirementsEvaluator` grades directly.
 - **Grounded finding** — an analyzer finding whose cited quotes and tool calls are present in the transcript and consistent with the recomputed grade.

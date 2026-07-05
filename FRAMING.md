@@ -6,17 +6,17 @@ A customer-service dialogue is *partially observable*: the user's objective is a
 
 The task is *partially observable*: the agent maintains a **belief state** — a posterior over a **latent variable** (the user's true objective) that it updates from partial, incrementally-revealed evidence.
 
-- **Belief-state tracking under partial observability (POMDP).** The hidden problem is the latent state; the agent's estimate is the belief state. "Belief state" is also the term of art in **dialogue-state tracking (DST)** for task-oriented dialogue (Young et al. 2013), so tracking a `ProblemSpecBelief` here is native, not a metaphor.
+- **Belief-state tracking under partial observability (POMDP).** The hidden problem is the latent state; the agent's estimate is the belief state. "Belief state" is also the term of art in **dialogue-state tracking (DST)** for task-oriented dialogue (Young et al. 2013), so tracking the agent's **belief state** here is native, not a metaphor. (Agent-side belief tracking is a deferred later phase; the current pilot re-scores against the grader's `StructuredUserRequirements` only.)
 - **Assistance games / CIRL** (Hadfield-Menell & Russell). Names *why* task 47 fails: an agent uncertain about the human's objective should be deferential / information-gathering, not act decisively. Acting while the objective is `UNKNOWN` is the canonical assistance-game failure — acting under epistemic uncertainty instead of reducing it.
 - **Grounding / common ground** (Clark). The dialogue-pragmatics term for two parties converging on shared understanding.
-- **Theory of Mind / intent inference / user modeling** (Fischer 2001). Modeling the user's goal as a hidden mental state. `ProblemSpec` is the *action-relevant, checkable projection* of the user model — not the full model.
+- **Theory of Mind / intent inference / user modeling** (Fischer 2001). Modeling the user's goal as a hidden mental state. `StructuredUserRequirements` is the *action-relevant, checkable projection* of the user model — not the full model.
 - **The convergence itself:** posterior contraction / concentration (Bayesian); identifiability (whether the truth can be recovered from the observations at all).
 
 ## 2. Decompose into structured parts; grade the process, not just the outcome
 
 - **Process supervision vs. outcome supervision** — process reward models (PRM) vs. outcome reward models (ORM) (OpenAI, *Let's Verify Step by Step*). We propose a **PRM over the belief trajectory**: grade how well the agent extracted the truth, not only the terminal state.
 - **The structure experts define:** semantic frames / slot filling / a domain ontology (dialogue systems). The "hydrated problem spec" is a filled semantic frame / grounded specification.
-- **Structured prediction** — the `ProblemSpec` is a structured output, not a scalar.
+- **Structured prediction** — `StructuredUserRequirements` is a structured output, not a scalar.
 - **Why structure makes the grader more accurate:** factored / decomposed evaluation and scalable oversight (Christiano's IDA, Irving's debate, Ought's factored cognition; Anthropic's scalable-oversight agenda). Decomposition raises inter-rater reliability — the reason rubric-based grading beats holistic scoring.
 
 ## 3. Preconditions on knowledge, not just the world (epistemic planning)
@@ -43,7 +43,7 @@ Our core move — an action may require the agent to *know* something, not merel
 **Deng et al. 2026, "Uncertainty-Aware Clarification in LLM Agents with Information Gain"** ([arXiv:2606.03135](https://arxiv.org/abs/2606.03135)) is the nearest neighbor: like us it works on τ-Bench, treats the user's goal as a latent variable, and rewards the agent for reducing uncertainty about it before acting. Their **Information Gain Reward** — the log-likelihood shift of the ground-truth goal under the model after a clarifying question — is an instantiation of the **value of information** (§3). We share that premise, and differ on representation, mechanism, and what we measure:
 
 - **Reactive vs. proactive.** Their clarifier fires *reactively, when tool-execution feedback reveals missing information*. Ours is a *proactive precondition* checked **before** the action fires. This matters concretely: **task 47 produces no failing tool call** — the transfer succeeds and leaves the DB unchanged — so a reactive-on-feedback clarifier structurally cannot detect it. A precondition gate can.
-- **Flat goal string vs. typed spec.** Their target is a normalized natural-language goal string; the belief is implicit in the model's token-level probabilities ("no explicit discrete goal space or slot inventory"). Ours is a typed `ProblemSpec` with per-field **ontic/epistemic preconditions** and explicit `UNKNOWN` slots — auditable and per-action.
+- **Flat goal string vs. typed spec.** Their target is a normalized natural-language goal string; the belief is implicit in the model's token-level probabilities ("no explicit discrete goal space or slot inventory"). Ours is a typed `StructuredUserRequirements` with per-field **ontic/epistemic preconditions** and explicit `UNKNOWN` slots — auditable and per-action.
 - **Agent method vs. eval + policy.** They contribute a clarifier-training method and a reward; success is measured Pass@1. We contribute (a) an **eval** that catches the false-pass outcome-grading misses, and (b) a **per-action enumeration** of which fields must be resolved — expert-authored. They enumerate no per-action precondition policy.
 - **They defer our exact target.** Their failure analysis (App. 6.5) notes a case where "clarification resolves ambiguity but execution violates policy," concluding it "motivat[es] future work on jointly optimizing clarification and execution." That clarify-succeeds-yet-action-violates case is precisely what our precondition grader scores.
 

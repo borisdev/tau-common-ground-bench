@@ -1,4 +1,14 @@
-# ProblemSpecBelief: A Per-Turn Belief-Convergence Layer for τ-bench
+# Agent belief-convergence layer: a per-turn belief tracker for τ-bench (deferred later phase)
+
+> **Status — deferred later phase.** This document designs the **agent-side belief-tracking
+> layer**: a per-turn tracker of the agent's evolving belief about the user's problem. It is
+> **not** the current pilot. The current pilot is a **paired re-scoring experiment**:
+> [`StructuredUserInstructionsV2`](README.md) preserves τ³'s original `task_instructions` prose
+> byte-for-byte and adds a typed `StructuredUserRequirements` field, and a
+> `StructuredRequirementsEvaluator` re-scores the *same recorded trajectory* the τ³ grader already
+> scored — needing only the **grader's** view, not the agent's belief. The belief tracker below
+> (and its `ProblemSpecBelief` schema) is a valuable follow-on, but nothing in the pilot depends
+> on it. Read it as the deferred phase, not as shipped machinery.
 
 > **What this is.** A design + reference implementation plan for an *optional instrumentation
 > layer* on top of τ³-bench that captures and scores the agent's **evolving belief about the
@@ -61,7 +71,7 @@ that has never been made explicit or scored — in any version through τ³.**
 
 Each τ³ task hand-authors two artifacts: the free-text scenario (`user_scenario.instructions.task_instructions`) and the structured `evaluation_criteria` (`reward_basis` = DB + COMMUNICATE + assertions). They are separate, so they can drift. On task 47 the scenario states *"you don't want to be transferred"*; the `evaluation_criteria` encode no no-transfer predicate; the grader grades the criteria, so the transfer passes.
 
-A single `ProblemSpec` removes the drift by construction: compile the user-sim prompt *and* the grading predicates from one source, and the two cannot disagree — the hand-authored `evaluation_criteria` become a compiled view, not a second artifact. This bounds *internal consistency* (scenario and grading agree); it does not certify the spec encodes the *right* constraints (the ontology-correctness problem, separate).
+A single typed requirement spec — `StructuredUserRequirements`, carried inside `StructuredUserInstructionsV2` — removes the drift by construction: derive the grading predicates from the same typed source that structures the scenario, and the two cannot disagree — the hand-authored `evaluation_criteria` become a compiled view, not a second artifact. This bounds *internal consistency* (scenario and grading agree); it does not certify the spec encodes the *right* constraints (the ontology-correctness problem, separate).
 
 ---
 
@@ -158,7 +168,7 @@ directly to a classic "hallucinated citation" failure mode (§7).
 
 ---
 
-## 5. Ground truth: `ProblemSpec` (τ³ pre-pays most of the cost)
+## 5. Ground truth: `StructuredUserRequirements` (τ³ pre-pays most of the cost)
 
 A skeptic's objection to this whole idea is *"isn't belief-recall just re-deriving the instruction
 the user already holds?"* Two things defeat it:
@@ -172,7 +182,7 @@ the user already holds?"* Two things defeat it:
    has not been told everything; measuring what it correctly inferred vs. hallucinated vs.
    still-missing is information the terminal reward genuinely does not contain.
 
-### Metrics (per turn, against the static `ProblemSpec`)
+### Metrics (per turn, against the static `StructuredUserRequirements`)
 
 | Metric | Definition |
 |---|---|
@@ -197,8 +207,8 @@ This converts τ-bench's single terminal bit into a **trajectory of belief F1**,
             └─────────────────────────────┬────────────────────────┘
                                           │ trajectory (read-only)
         ┌──────────────────────────────────▼──────────── NEW: optional observer ┐
- Task ──► distill ──► ProblemSpec ──────┐           │
- (known_info / unknown_info / criteria)     ▼           ▼
+ Task ──► distill ──► StructuredUserRequirements ─┐         │
+ (known_info / unknown_info / criteria)          ▼         ▼
                                      BeliefScorer ◄── BeliefExtractor (observer LLM; reads traj[:k])
                                             │           │  emits ProblemSpecBelief per agent turn
                                             ▼           ▼
@@ -209,7 +219,7 @@ This converts τ-bench's single terminal bit into a **trajectory of belief F1**,
 
 1. **Fully decoupled (recommended):** a new `src/tau2/scripts/belief_trace_analysis.py` mirroring
    `evaluate_trajectories.py`. Reads saved `SimulationRun`s, replays turn-by-turn, calls the
-   observer, scores against `ProblemSpec`. **Zero changes to agents, envs, or the run loop** —
+   observer, scores against `StructuredUserRequirements`. **Zero changes to agents, envs, or the run loop** —
    runs on *historical* result files. This is the "optional instrumentation layer," and the answer
    to "can it work without touching existing agents?" is **yes**.
 2. **As an evaluator:** a `BeliefEvaluator(EvaluatorBase[Message])` alongside the existing evaluators,
@@ -315,7 +325,7 @@ binding constraint on grader fidelity.
   `break_down_metrics`, `hallucination_reviewer`, and `nl_assertions` are adjacent but none tracks
   per-turn agent belief or convergence.
 - τ³'s `known_info` / `unknown_info` split and the incrementally-withholding user simulator together
-  make `ProblemSpec` cheap to build *and* defensible against the "you're just re-reading the
+  make `StructuredUserRequirements` cheap to build *and* defensible against the "you're just re-reading the
   instruction" objection. **Make the convergence curve, not terminal belief-F1, the headline.**
 - It is cheap and non-invasive (post-hoc observer over existing `SimulationRun`s), which is what
   makes a benchmark extension adoptable — and it upgrades cleanly into a training signal via `gym/`.
