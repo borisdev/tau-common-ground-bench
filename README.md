@@ -53,18 +53,14 @@ We make the unobservable **checkable**: the user's latent requirements become a 
 
 ### Existing in τ³ — implicit, in prose
 
-τ³ keeps the user's requirements in one prose field, `task_instructions`, and grades only a structured subset of the scenario — so a requirement left in prose is invisible to grading. Task 47's `task_instructions`, verbatim ([source ↗](https://github.com/borisdev/tau-preflight-check-bench/blob/591a7a5474666b90634eb9b1ec51371b889bc1db/data/tau2/domains/airline/tasks.json#L3408-L3416)). The **red** line is a stated requirement that is not in τ³'s graded criteria:
+τ³ keeps the user's requirements in one prose field, `task_instructions`, and grades only a structured subset — so a requirement left in prose is invisible to grading. The buried line from task 47 (shown in full under *Motivation* above; [source ↗](https://github.com/borisdev/tau-preflight-check-bench/blob/591a7a5474666b90634eb9b1ec51371b889bc1db/data/tau2/domains/airline/tasks.json#L3408-L3416)):
 
 ```diff
-{
   "task_instructions": [
-    "Be persistent and don't provide more information than necessary.",
-    "You want to get a full refund for the flight.",
+    …
 -   "You don't want to be transferred to another agent.",
-    "You do not want to cancel the flight if you cannot get the full refund.",
-    "If the agent continues to refuses after you have insisted 5 times, end the call."
+    …
   ]
-}
 ```
 
 ### Added — explicit, as `UserPreflightRequirements`
