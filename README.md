@@ -135,6 +135,8 @@ Data artifacts: [`poc/trajectories.json`](poc/trajectories.json), [`poc/verified
 
 Reproduce: `run_airline.py` → `analyze_beliefs.py` → `verify_findings.py`.
 
+Each rule's `action` is a **canonical τ³ tool name**, matched against the trajectory's actual tool calls (the user's own phrasing lives in `source_quote`). Scaling the analysis therefore starts from enumerating τ³'s **consequential-tool surface** — the finite set of actions a preflight rule can guard.
+
 ## FAQ
 
 <details>
@@ -198,6 +200,18 @@ One optional field, `user_preflight_requirements: UserPreflightRequirements | No
 <summary><b>How does this relate to τ²-Bench / dual control?</b></summary>
 
 τ²'s contribution was **dual control** — the user-simulator can also act on the shared world (*who can act*). This layer is orthogonal — *what the grader can observe* (the user's stated requirements vs. τ³'s graded criteria). They compose, but this work doesn't depend on dual control: the pilot uses the single-control **airline** domain. We fork τ³ for its fixed tasks and structured task schema; the original τ-bench is deprecated. More: [`FRAMING.md`](FRAMING.md).
+</details>
+
+<details>
+<summary><b>Why not ship a default preflight protocol (e.g., "always ask before escalating when unsure")?</b></summary>
+
+Tempting, but deliberately deferred — three reasons:
+
+1. **It needs belief tracking we haven't built.** "When unsure" means the agent's belief on that requirement is `UNKNOWN`. Phase 1 grades whether a *stated* requirement was honored (compliance); detecting *unresolved* ones and requiring an ask-first is the `UserPreflightRequirementsBelief` layer (Phase 3). The current grader doesn't model agent uncertainty, so it can't score "should have asked."
+2. **A designer-invented default breaks our own anti-circularity rule.** The pilot's legitimacy is that every rule is *lifted from the task with provenance*, not invented. A blanket "always ask before escalating" is exactly an invented rule — the kind that should come from a **harm-anchored SME**, not the benchmark author. Baking in defaults would undercut the SME-elicitation thesis.
+3. **It conflates three distinct mechanisms.** A *stated* refusal (task 47 — graded now), an *unknown* requirement (probe first — Phase 3), and a *material-consequence disclosure* ("warn before agreeing to something harmful" — the informed-consent slice) are different things. Collapsing them into one "default protocol" turns a clean eval into a decision tree.
+
+Where it lands instead: a global invariant like *"under uncertainty, default to ask"* belongs in the **runtime gate** (Phase 3, three-valued allow / deny / **ask**), and the concrete per-action defaults come from the SME-authored, harm-anchored **`PreflightPolicyPack`** — not the Phase-1 grader. Deferring it keeps the pilot's result attributable to *one stated, provenance-grounded constraint*, not to designer guesses.
 </details>
 
 <details>
