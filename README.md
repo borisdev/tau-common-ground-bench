@@ -4,7 +4,7 @@
 
 ## Motivation
 
-**A worked failure.** We ran Claude Haiku on τ³ airline task 47 and hit *two* failures at once. The agent correctly refused an ineligible refund, then **transferred the user to a human anyway — without confirming they wanted it** — skipping a preflight check on a stated user requirement, shown in red below:
+We ran Claude Haiku on τ³ airline task 47 and hit *two* failures at once. The agent correctly refused an ineligible refund, then **transferred the user to a human anyway — without confirming they wanted it** — skipping a preflight check on a stated user requirement, shown in red below:
 
 ```diff
 {
