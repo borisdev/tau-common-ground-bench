@@ -26,7 +26,7 @@ Like a medical treatment, an AI agent can *effectively* solve the user's problem
 
 ## Scope
 
-This release grades whether the agent honored the user's **stated** constraints on *how* an action is done (task 47's *don't-transfer*) — **not** task completion (τ³'s job), and **not** probing the *unknown* requirements the user never stated ([the deferred belief-tracking phase →](#what-this-sets-up-eliciting-sme-expertise-and-belief-tracking)).
+This release grades whether the agent honored the user's **stated** constraints on *how* an action is done (task 47's *don't-transfer*) — **not** task completion (τ³'s job), and **not** probing the *unknown* requirements the user never stated ([the deferred belief-tracking phase →](#impact-on-ai-quality-eliciting-sme-expertise-and-belief-tracking)).
 
 <details>
 <summary><b>Glossary</b> — key terms, sequenced by dependency (click to expand)</summary>
@@ -105,11 +105,13 @@ The `PreflightRequirementsEvaluator` flips task 47 `PASS → FAIL` — a control
 Epistemic precondition in depth (ontic vs epistemic, SME hydration, the PDDL / Pydantic action frame): [`docs/epistemic-preconditions.md`](docs/epistemic-preconditions.md).
 
 
-## What this sets up: eliciting SME expertise and belief tracking
+## Impact on AI quality: eliciting SME expertise and belief tracking
 
 Both directions build on the same `UserPreflightRequirements` target.
 
-**Eliciting SME expertise** — the *should-exist but omitted* half. When τ³'s grader ignores a user requirement stated only in prose, that's a **signal**: it marks an action where a domain expert could author an explicit preflight policy. Most real-world protocol rules aren't stated in any task at all — so where a requirement is only implicit, or missing, is exactly where to **elicit an SME** and turn the answer into a typed constraint, building a reusable **`PreflightPolicyPack`**. Phase-1 flagging shows *which* actions need it most.
+### Eliciting SME expertise
+
+The *should-exist-but-omitted* half. Most real-world protocol rules aren't written into any task. Where the grader misses a prose requirement — or where none was ever stated — is where to **elicit a domain expert**, turn the answer into a typed constraint, and build a reusable **`PreflightPolicyPack`**. Phase-1 flagging shows *which* actions need it most.
 
 To illustrate, synthetic SME protocols answering *what must a customer-service agent establish about the user before taking action X?*:
 
@@ -123,7 +125,9 @@ To illustrate, synthetic SME protocols answering *what must a customer-service a
 
 → Full illustrative checklist (~25 airline actions, with the anti-circularity caveat): [`docs/preflight-checklist-example.md`](docs/preflight-checklist-example.md). Harm-anchored elicitation pipeline: [`docs/design-notes-what-to-establish.md`](docs/design-notes-what-to-establish.md).
 
-**Belief tracking** — `UserPreflightRequirementsBelief`. Per-turn tracking of whether the agent *resolves* each requirement (each slot `KNOWN` / `UNKNOWN`) before acting, scored against the same target. ("Belief state" is the term of art in dialogue-state tracking — Young et al. 2013.) Recent work points at this gap:
+### Belief tracking
+
+`UserPreflightRequirementsBelief` — per-turn tracking of whether the agent *resolves* each requirement (each slot `KNOWN` / `UNKNOWN`) before acting, scored against the same target. ("Belief state" is the term of art in dialogue-state tracking — Young et al. 2013.) Recent work points at this gap:
 - **Deng et al. 2026** ([arXiv:2606.03135](https://arxiv.org/abs/2606.03135)) rewards clarifying questions by information gain, but names our exact target as *future work*: App. 6.5 flags the case where "clarification resolves ambiguity but execution violates policy," motivating "jointly optimizing clarification and execution."
 - **PDDL-Mind** ([arXiv:2604.17819](https://arxiv.org/abs/2604.17819)) makes belief explicit as a *tracked* quantity; we extend belief from tracked → an *action precondition*.
 - **Intent-governed authorization** ([arXiv:2606.22916](https://arxiv.org/abs/2606.22916)) gates tool authority by *expressed* intent; belief tracking targets *latent* intent — inferred and verified, not declared.
