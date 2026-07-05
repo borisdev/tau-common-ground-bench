@@ -221,7 +221,7 @@ Where it lands instead: a global invariant like *"under uncertainty, default to 
 - The pilot grades outright `DENIED` refusals only; conditional (world-state) authorizations — permit an action only if a policy predicate holds — are future work.
 </details>
 
-## Method
+## How to reproduce
 
 | Stage | File | What it does |
 |---|---|---|
