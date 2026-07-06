@@ -111,8 +111,6 @@ Epistemic precondition in depth (ontic vs epistemic, SME hydration, the PDDL / P
 
 ## Impact on AI quality: eliciting SME expertise
 
-Most real-world protocol rules aren't written into any task. Where the grader misses a prose requirement — or where none is specified in any task — is where to **elicit a domain expert**, turn the answer into a typed constraint, and build a reusable **`PreflightPolicyPack`**. Phase-1 flagging shows *which* actions need it most.
-
 To illustrate, synthetic SME protocols answering *what must a customer-service agent establish about the user before taking action X?*:
 
 | Agent action | SME-elicited preflight protocol | Example failure caught |
