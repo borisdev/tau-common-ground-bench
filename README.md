@@ -1,15 +1,15 @@
-# τ-PreflightCheck
+# τ-bench Audit
 
 [![CI](https://github.com/borisdev/tau-bench-audit/actions/workflows/ci.yml/badge.svg)](https://github.com/borisdev/tau-bench-audit/actions/workflows/ci.yml)
 
-*τ-PreflightCheck extends τ-bench by grading not only whether the agent completes the task, but also whether it respects **each user’s specific requirements on consequential actions**. The downstream aim is to surface failures that reveal where human expertise is needed to define explicit preflight-policy checks on pending actions in the face of ambiguity — “did the user really want to be escalated?”*
+*An audit of τ-bench. An agent can fire a **consequential action** (transfer, cancel, charge) the user didn’t want, and τ-bench’s outcome-grade can’t see it. This audit **grades** agents against the policy’s stated preflight invariants — auditing the **grader** — and **flags** the user-specific ambiguities that reveal where the policy is silent — auditing the **spec**. Those flags are where a domain expert should grow the policy.*
 
 <details>
 <summary><b>Glossary</b> — key terms, sequenced by dependency (click to expand)</summary>
 
 *Sequenced by dependency — each definition uses only the terms above it.*
 
-- **τ (tau)** — τ-bench grades **Tool–Agent–User** interaction (Sierra): a *tool*-using *agent* serving a *user* in a real-world domain. τ² added dual control; **τ³** added task fixes (the version we extend); this repo is **τ-PreflightCheck**.
+- **τ (tau)** — τ-bench grades **Tool–Agent–User** interaction (Sierra): a *tool*-using *agent* serving a *user* in a real-world domain. τ² added dual control; **τ³** added task fixes (the version we audit); this repo is **τ-bench Audit**.
 - **Common ground / common grounding** — the shared understanding two parties create, repair, and update in dialogue; an established term (Clark 1991; [Udagawa & Aizawa, AAAI 2019](https://arxiv.org/abs/1907.03399)). The concept behind the preflight check — the agent reaches *enough* shared understanding before acting (Clark's **grounding criterion**, *sufficient for current purposes*).
 - **Ontic predicate** — a fact about the world, resolvable by a **database query** (e.g., `refund_eligible` — check the fare rules). τ³ already grades these.
 - **Epistemic predicate** — a fact about what the *agent knows*. **No DB query can resolve it** — the agent must **probe the user** (ask) to reduce the ambiguity in its belief. *Why the word earns its keep (counterfactual):* drop "epistemic" and "precondition" defaults to **ontic** — you query the DB, see nothing wrong, and pass task 47. "Epistemic" is the intervention: it redirects the check from the world to the agent's belief. Without the word, the failure is invisible.
@@ -30,6 +30,15 @@
 Deeper theory and full prior art (POMDP belief states, assistance games, epistemic planning, Design by Contract): [`FRAMING.md`](FRAMING.md). Design notes — the four content types (requirement / preference / understanding / consent), informed consent as a bounded slice of causal-model alignment, and the harm-anchored SME elicitation pipeline: [`docs/design-notes-what-to-establish.md`](docs/design-notes-what-to-establish.md).
 
 </details>
+
+## What this is
+
+**An audit of an agent benchmark, not a new benchmark.** τ-bench Audit stress-tests τ³'s two halves — its **grader** and its **policy** — for the check a consequential action needs *before* it fires, using recorded agent trajectories as the probe. Two modes:
+
+- **Grade — audit the grader.** Against the policy's **general invariants** (rules for every user, e.g. *"confirm before a booking change"*), grade whether the agent kept them, then check whether τ³'s grader caught the violation. A violation the grader passes is a **grader blind spot**.
+- **Flag — audit the spec.** Where the policy is **silent** (nothing says *"confirm before escalating"*) and a user's latent preference is violated, we don't grade — we **flag**. Flags mark where the policy is underspecified.
+
+**The flywheel:** flags → a domain expert reviews recurring ones → authors a new policy invariant → which becomes gradeable. Today's ambiguous *flag* becomes tomorrow's graded *rule*; the audit surfaces the gaps, and the gaps grow the policy.
 
 ## Motivation
 
