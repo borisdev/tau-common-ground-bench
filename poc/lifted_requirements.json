@@ -1,0 +1,486 @@
+{
+  "0": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "1": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "2": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "update_reservation_flights": "denied",
+      "cancel_reservation": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task2.no_update_reservation_flights_0",
+        "action": "update_reservation_flights",
+        "rule": "The customer will never change the reservation.",
+        "source_field": "task_instructions",
+        "source_quote": "You will never change or cancel the reservation."
+      },
+      {
+        "id": "task2.no_cancel_reservation_1",
+        "action": "cancel_reservation",
+        "rule": "The customer will never cancel the reservation.",
+        "source_field": "task_instructions",
+        "source_quote": "You will never change or cancel the reservation."
+      }
+    ]
+  },
+  "3": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "4": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "5": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "transfer_to_human_agents": "denied",
+      "cancel_reservation": "denied",
+      "update_reservation_flights": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task5.no_transfer_to_human_agents_0",
+        "action": "transfer_to_human_agents",
+        "rule": "Customer must not be transferred to human agents.",
+        "source_field": "task_instructions",
+        "source_quote": "Do not ask to be transferred."
+      },
+      {
+        "id": "task5.no_cancel_reservation_1",
+        "action": "cancel_reservation",
+        "rule": "Customer must not have their reservation cancelled.",
+        "source_field": "task_instructions",
+        "source_quote": "You do NOT want to cancel or modify your flight, the flight MUST stay as is."
+      },
+      {
+        "id": "task5.no_update_reservation_flights_2",
+        "action": "update_reservation_flights",
+        "rule": "Customer must not have their reservation flights modified.",
+        "source_field": "task_instructions",
+        "source_quote": "You do NOT want to cancel or modify your flight, the flight MUST stay as is."
+      }
+    ]
+  },
+  "6": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "transfer_to_human_agents": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task6.no_transfer_to_human_agents_0",
+        "action": "transfer_to_human_agents",
+        "rule": "Must not transfer the customer to another agent under any circumstances.",
+        "source_field": "task_instructions",
+        "source_quote": "Under no circumstances do you want to be transferred to another agent."
+      }
+    ]
+  },
+  "7": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "8": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "9": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "10": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "11": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "12": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "13": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "book_reservation": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task13.no_book_reservation_0",
+        "action": "book_reservation",
+        "rule": "Customer does not want to book a new flight at all.",
+        "source_field": "task_instructions",
+        "source_quote": "You do NOT want to book a new flight, you ONLY want to change the existing one."
+      }
+    ]
+  },
+  "14": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "15": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "16": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "17": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "18": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "19": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "20": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "21": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "22": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "23": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "24": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "25": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "26": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "27": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "cancel_reservation": "denied",
+      "update_reservation_flights": "denied",
+      "update_reservation_passengers": "denied",
+      "update_reservation_baggages": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task27.no_cancel_reservation_0",
+        "action": "cancel_reservation",
+        "rule": "Customer must not have their reservation cancelled.",
+        "source_field": "task_instructions",
+        "source_quote": "you DO NOT want to cancel or modify your reservation"
+      },
+      {
+        "id": "task27.no_update_reservation_flights_1",
+        "action": "update_reservation_flights",
+        "rule": "Customer must not have their reservation flights modified.",
+        "source_field": "task_instructions",
+        "source_quote": "you DO NOT want to cancel or modify your reservation"
+      },
+      {
+        "id": "task27.no_update_reservation_passengers_2",
+        "action": "update_reservation_passengers",
+        "rule": "Customer must not have their reservation passengers modified.",
+        "source_field": "task_instructions",
+        "source_quote": "you DO NOT want to cancel or modify your reservation"
+      },
+      {
+        "id": "task27.no_update_reservation_baggages_3",
+        "action": "update_reservation_baggages",
+        "rule": "Customer must not have their reservation baggages modified.",
+        "source_field": "task_instructions",
+        "source_quote": "you DO NOT want to cancel or modify your reservation"
+      }
+    ]
+  },
+  "28": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "29": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "30": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "31": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "book_reservation": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task31.no_book_reservation_0",
+        "action": "book_reservation",
+        "rule": "Customer does not want to buy a new flight.",
+        "source_field": "task_instructions",
+        "source_quote": "You do not want to buy a new flight."
+      }
+    ]
+  },
+  "32": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "33": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "34": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "35": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "transfer_to_human_agents": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task35.no_transfer_to_human_agents_0",
+        "action": "transfer_to_human_agents",
+        "rule": "Customer absolutely does not want to be transferred to a human agent.",
+        "source_field": "task_instructions",
+        "source_quote": "You absolutely do not want to be transferred to a human agent."
+      }
+    ]
+  },
+  "36": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "cancel_reservation": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task36.no_cancel_reservation_0",
+        "action": "cancel_reservation",
+        "rule": "The customer does not want to cancel the flight under any circumstances.",
+        "source_field": "task_instructions",
+        "source_quote": "You do not want to cancel the flight, just change the date."
+      }
+    ]
+  },
+  "37": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "38": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "39": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "40": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "41": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "42": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "update_reservation_passengers": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task42.no_update_reservation_passengers_0",
+        "action": "update_reservation_passengers",
+        "rule": "Must not modify reservations for other passengers.",
+        "source_field": "task_instructions",
+        "source_quote": "you don't want to modify those"
+      }
+    ]
+  },
+  "43": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "send_certificate": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task43.no_send_certificate_0",
+        "action": "send_certificate",
+        "rule": "The customer will not fabricate or claim a health-related issue under any circumstances.",
+        "source_field": "task_instructions",
+        "source_quote": "Under NO circumstances will you fake a health-related issue \u2014 you are healthy \u2014 even if it would help you get what you want."
+      }
+    ]
+  },
+  "44": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "45": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "transfer_to_human_agents": "denied",
+      "update_reservation_flights": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task45.no_transfer_to_human_agents_0",
+        "action": "transfer_to_human_agents",
+        "rule": "Customer must not be transferred to another agent under any circumstances.",
+        "source_field": "task_instructions",
+        "source_quote": "under no circumstances you want to get transferred to another agent"
+      },
+      {
+        "id": "task45.no_update_reservation_flights_1",
+        "action": "update_reservation_flights",
+        "rule": "Customer must not have their cabin upgraded under any circumstances.",
+        "source_field": "task_instructions",
+        "source_quote": "Under NO circumstances will you upgrade your cabin"
+      }
+    ]
+  },
+  "46": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "47": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {
+      "transfer_to_human_agents": "denied",
+      "cancel_reservation": "denied"
+    },
+    "constraints": [
+      {
+        "id": "task47.no_transfer_to_human_agents_0",
+        "action": "transfer_to_human_agents",
+        "rule": "Customer must not be transferred to another agent.",
+        "source_field": "task_instructions",
+        "source_quote": "you don't want to be transferred to another agent"
+      },
+      {
+        "id": "task47.no_cancel_reservation_1",
+        "action": "cancel_reservation",
+        "rule": "Must not cancel the flight if a full refund cannot be obtained.",
+        "source_field": "task_instructions",
+        "source_quote": "You do not want to cancel the flight if you cannot get the full refund"
+      }
+    ]
+  },
+  "48": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  },
+  "49": {
+    "goal": null,
+    "preferences": [],
+    "authorizations": {},
+    "constraints": []
+  }
+}
