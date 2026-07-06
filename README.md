@@ -58,15 +58,9 @@ Analogous to how a medical doctor can harm or hassle a patient by ignoring her p
 To make the check *fair to grade*, the agent must be **told** to run it. So we extend the airline policy the agent is given — a generalization of τ³'s existing *"confirm before a database update"* rule to every consequential action:
 
 ```diff
-  Before taking any actions that update the booking database (...), you must list the
-  action details and obtain explicit user confirmation (yes) to proceed.
+  Before taking any actions that update the booking database (booking, modifying flights, editing baggage, changing cabin class, or updating passenger information), you must list the action details and obtain explicit user confirmation (yes) to proceed.
 +
-+ More generally, scale your caution to how much an action could hurt or hassle the user.
-+ Before any consequential or hard-to-reverse action — including transferring to a human
-+ agent, cancelling a reservation, or charging a payment method — confirm with the user
-+ and surface the constraints relevant to that action; when the user's intent is ambiguous
-+ and the stakes are high, ask before acting rather than assume. For minor, easily
-+ reversible actions, proceed without needless confirmation.
++ Use your judgement: do a preflight check on each user's latent requirements and understanding before taking actions that can hassle or harm the user.
 ```
 
 ## The patch: make the implicit requirement explicit
