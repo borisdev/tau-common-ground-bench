@@ -60,7 +60,7 @@ Honest boundary: Phase-1 flags the *violated action* as a **proxy** for the miss
 <details>
 <summary><b>What's the implementation status?</b></summary>
 
-One optional field, `user_preflight_requirements: UserPreflightRequirements | None = None`, added directly to τ³'s `StructuredUserInstructions` (no wrapper). Types in [`preflight_requirements.py`](https://github.com/borisdev/tau-preflight-check-bench/blob/main/src/tau2/data_model/preflight_requirements.py); graded by `PreflightRequirementsEvaluator`; the first slice flips task 47 `PASS → FAIL`; merged to `main`. Optional/default-`None` → existing tasks load unchanged and the prose is byte-for-byte; the field is not shown to the agent (no leakage). Remaining work — wire into the live simulator and register as a `reward_basis` component — is [issue #1](https://github.com/borisdev/tau-preflight-check-bench/issues/1).
+One optional field, `user_preflight_requirements: UserPreflightRequirements | None = None`, added directly to τ³'s `StructuredUserInstructions` (no wrapper). Types in [`preflight_requirements.py`](https://github.com/borisdev/tau-discernment/blob/main/src/tau2/data_model/preflight_requirements.py); graded by `PreflightRequirementsEvaluator`; the first slice flips task 47 `PASS → FAIL`; merged to `main`. Optional/default-`None` → existing tasks load unchanged and the prose is byte-for-byte; the field is not shown to the agent (no leakage). Remaining work — wire into the live simulator and register as a `reward_basis` component — is [issue #1](https://github.com/borisdev/tau-discernment/issues/1).
 </details>
 
 <details>
@@ -86,7 +86,7 @@ Where it lands instead: a global invariant like *"under uncertainty, default to 
 
 - Six tasks, one agent model, airline (single-control) only — a pilot, not a measured rate.
 - Agent-side belief tracking (a per-turn belief-vs-requirements convergence curve) is a deferred later phase; the paired re-scoring experiment doesn't depend on it.
-- The `PreflightRequirementsEvaluator` runs against recorded trajectories (paired re-scoring); wiring it into the live user-simulator and registering it as a `reward_basis` component is the remaining work ([issue #1](https://github.com/borisdev/tau-preflight-check-bench/issues/1)).
+- The `PreflightRequirementsEvaluator` runs against recorded trajectories (paired re-scoring); wiring it into the live user-simulator and registering it as a `reward_basis` component is the remaining work ([issue #1](https://github.com/borisdev/tau-discernment/issues/1)).
 - DB grades are recomputed against τ³'s real `reward_basis`; the task-47 pass is verified against that spec.
 - The pilot grades outright prohibitions only; conditional (world-state) authorizations — permit an action only if a policy predicate holds — are future work.
 </details>

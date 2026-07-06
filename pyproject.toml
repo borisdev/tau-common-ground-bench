@@ -83,8 +83,8 @@ all = [
     "tau2[voice,knowledge,gym,dev,experiments]",
 ]
 [project.urls]
-Homepage = "https://github.com/borisdev/tau-preflight-check-bench"
-Repository = "https://github.com/borisdev/tau-preflight-check-bench"
+Homepage = "https://github.com/borisdev/tau-discernment"
+Repository = "https://github.com/borisdev/tau-discernment"
 Upstream = "https://github.com/sierra-research/tau2-bench"
 
 [project.scripts]
