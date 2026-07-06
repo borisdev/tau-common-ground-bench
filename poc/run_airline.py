@@ -88,7 +88,7 @@ def run_task(tid, run=0):
     usys = USER_SIM_TMPL.format(instructions=user_instructions(task))
 
     # user opens
-    u = _msg(model=USER_MODEL, max_tokens=300, system=usys, messages=user_msgs)
+    u = _msg(model=USER_MODEL, max_tokens=300, system=[{"type": "text", "text": usys, "cache_control": {"type": "ephemeral"}}], messages=user_msgs)
     utext = text_of(u.content); user_msgs.append({"role": "assistant", "content": utext})
     trace.append({"role": "user", "text": utext})
 
@@ -99,7 +99,7 @@ def run_task(tid, run=0):
         # agent inner tool loop until it emits a user-facing text
         agent_text = ""
         for _ in range(MAX_TOOL_STEPS):
-            r = _msg(model=AGENT_MODEL, max_tokens=1024, system=POLICY, tools=tools, messages=agent_msgs)
+            r = _msg(model=AGENT_MODEL, max_tokens=1024, system=[{"type": "text", "text": POLICY, "cache_control": {"type": "ephemeral"}}], tools=tools, messages=agent_msgs)
             agent_msgs.append({"role": "assistant", "content": r.content})
             tool_uses = [b for b in r.content if b.type == "tool_use"]
             txt = text_of(r.content)
@@ -121,7 +121,7 @@ def run_task(tid, run=0):
             agent_text = "(no response)"
         # user reacts
         user_msgs.append({"role": "user", "content": agent_text})
-        u = _msg(model=USER_MODEL, max_tokens=300, system=usys, messages=user_msgs)
+        u = _msg(model=USER_MODEL, max_tokens=300, system=[{"type": "text", "text": usys, "cache_control": {"type": "ephemeral"}}], messages=user_msgs)
         utext = text_of(u.content); user_msgs.append({"role": "assistant", "content": utext})
         trace.append({"role": "user", "text": utext})
 
