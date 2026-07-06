@@ -8,3 +8,7 @@ data/tau2/results/
 *.m4a
 .env
 results/
+
+# generated run artifacts
+data/simulations/
+poc/paired_grades.*
