@@ -103,13 +103,28 @@ The `PreflightRequirementsEvaluator` flips task 47 `PASS → FAIL` — a control
 
 Epistemic precondition in depth (ontic vs epistemic, SME hydration, the PDDL / Pydantic action frame): [`docs/epistemic-preconditions.md`](docs/epistemic-preconditions.md).
 
+## Full-suite result: 50 airline tasks
+
+We ran the whole pipeline on the airline domain — one agent (Haiku), one run.
+
+| Measure | Value |
+|---|---|
+| Airline tasks run | 50 |
+| τ³ DB-grade | 27 PASS · 23 FAIL |
+| Tasks with a grounded preflight prohibition (Pass 1) | 11 · **0 dropped by the provenance check** |
+| **Flips — τ³ PASS → preflight FAIL** | **1 — task 6** |
+
+**The flip (task 6):** the agent fired `transfer_to_human_agents` despite the task stating *"Under no circumstances do you want to be transferred to another agent."* τ³ passed it (the transfer left the DB unchanged); the preflight grader caught it. A *different* task from 47, *stronger* wording, the **same blind spot** — reproduced automatically, with **zero invented rules**.
+
+> **Disclaimer — one stochastic run, not a rate.** A flip requires the agent to *actually commit* the violation, which is probabilistic; well-behaved agents rarely do. So **1 is a floor, not a prevalence rate.** A stable rate + confidence needs **multiple seeds and/or a second agent model** (future work). This is a Phase-1 pilot, not a measured benchmark.
+
 ## Impact on AI quality: eliciting SME expertise and belief tracking
 
 Both directions build on the same `UserPreflightRequirements` target.
 
 ### Eliciting SME expertise
 
-The *should-exist-but-omitted* half. Most real-world protocol rules aren't written into any task. Where the grader misses a prose requirement — or where none was ever stated — is where to **elicit a domain expert**, turn the answer into a typed constraint, and build a reusable **`PreflightPolicyPack`**. Phase-1 flagging shows *which* actions need it most.
+Most real-world protocol rules aren't written into any task. Where the grader misses a prose requirement — or where none was ever stated — is where to **elicit a domain expert**, turn the answer into a typed constraint, and build a reusable **`PreflightPolicyPack`**. Phase-1 flagging shows *which* actions need it most.
 
 To illustrate, synthetic SME protocols answering *what must a customer-service agent establish about the user before taking action X?*:
 
@@ -231,6 +246,16 @@ Where it lands instead: a global invariant like *"under uncertainty, default to 
 Data artifacts: [`poc/trajectories.json`](poc/trajectories.json), [`poc/verified_findings.json`](poc/verified_findings.json), readable transcripts in [`poc/traces/`](poc/traces/).
 
 Reproduce: `run_airline.py` → `analyze_beliefs.py` → `verify_findings.py`.
+
+**Full-suite run** (all 50 airline tasks; needs `ANTHROPIC_API_KEY`) — the three passes behind the result above:
+
+```bash
+uv run python poc/run_airline.py        # Pass 0 · record 50 trajectories         -> poc/trajectories_all.json
+uv run python poc/lift_requirements.py  # Pass 1 · lift provenance-grounded rules  -> poc/lifted_requirements.json
+uv run python poc/measure_flips.py      # Pass 2 · paired re-scoring               -> poc/flip_report.md
+```
+
+Pass 0 and Pass 1 are independent (run them in parallel); Pass 2 needs both.
 
 Each rule's `action` is a **canonical τ³ tool name**, matched against the trajectory's actual tool calls (the user's own phrasing lives in `source_quote`). Scaling the analysis therefore starts from enumerating τ³'s **consequential-tool surface** — the finite set of actions a preflight rule can guard.
 
