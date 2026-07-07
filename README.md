@@ -139,6 +139,7 @@ Each rule's `action` is a **canonical τ³ tool name**, matched against the traj
 
 - **Design:** [`PROBLEM_BELIEF_SPEC.md`](PROBLEM_BELIEF_SPEC.md) — the gap, the belief-state schema, metrics, integration.
 - **Framing / related work:** [`FRAMING.md`](FRAMING.md) — POMDP belief states, assistance games, process reward models, the Good Regulator theorem.
+- **Extension:** [`docs/multi-option-discernment-pareto-frontier.md`](docs/multi-option-discernment-pareto-frontier.md) — the same three objectives applied to *choosing among competing alternatives* via the Pareto frontier (medicine).
 - **Worked example:** [`poc/CASE_STUDY.md`](poc/CASE_STUDY.md) — task 47 with verbatim runtime objects and a turn-by-turn belief table.
 - **Per-task detail:** [`poc/FINDINGS.md`](poc/FINDINGS.md) — the pilot table with evidence and the verifier output.
 - **Code / data:** [`poc/`](poc/) scripts and JSON artifacts; readable transcripts in [`poc/traces/`](poc/traces/).
