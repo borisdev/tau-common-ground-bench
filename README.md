@@ -8,8 +8,6 @@
 - **safety invariants** — policy rules that hold for every customer
 - **user requirements** — this customer's own constraints
 
-*(Hints of the trilemma — optimizing one goal can sacrifice one or both of the others.)*
-
 The **two riskiest assumptions** of this work:
 
 1. **Is grading discernment relevant in the real world?**
