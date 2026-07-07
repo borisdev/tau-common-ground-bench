@@ -105,55 +105,6 @@ Each decision lands in a **harm-vs-hassle confusion matrix** — the discernment
 
 The two errors are **not symmetric**: *a hassle to avoid a harm is fine; a harm to avoid a hassle is not.* So the matrix is **severity-weighted** — a harm (FN) counts for far more than a hassle (FP), and *degree* matters too (one needless question ≠ six). Concretely: **overriding a customer who feels hassled by an escalation is the *right* call if it saves her $1,000 and her seat on the flight to her daughter's wedding.** Under-caution — letting a harm through to avoid a hassle — is the failure that matters most.
 
-## How the grader works
-
-Discernment is judged against **three policy layers**, with inheritance and override:
-
-1. **Invariants** — global rules for every user (never leak another user's data, never fabricate identity). *Base.*
-2. **SME action policy** — expert-authored per-action rules (verify identity before a refund; warn before an irreversible action). *Specialize per action.*
-3. **Personal requirements** — this user's own constraints, lifted from the task (*don't transfer me*; human approval first). *Specialize per user.*
-
-**Precedence is the load-bearing decision:** a more-specific layer can **tighten** but not **loosen** an invariant — invariants are `final` (XACML *deny-overrides*). A personal preference overrides a *default*, never a safety rule.
-
-**No tier is purely deterministic.** *Detecting* that an action touched a rule is mechanical (the tool fired; here's the verbatim quote). But the **verdict** — harm, hassle, or correct? — depends on context, so it needs a **rubric / LLM-judge / SME**, *even for an unauthorized action*: firing a forbidden tool might be a harm, a tolerable hassle, or the right call under a higher-priority override. There *is* a cheap, **airtight subset** — decisions governed by an *explicit* stated requirement (the pilot's task 47: the user wrote *"you don't want to be transferred,"* verbatim) — where the verdict is unambiguous and provenance-checkable. That subset is the **seed**; the general benchmark is judged.
-
-The result stays **decomposed — never one scalar**:
-
-```python
-score = {
-  "effectiveness": ...,           # did the task succeed (tau-bench)
-  "discernment": {
-    "harm":   ...,                # under-caution - the costly errors
-    "hassle": ...,                # over-caution - the lesser errors
-  },
-}
-```
-
-Each graded decision is one labeled example:
-
-```python
-class DiscernmentExample:
-    task_id; turn_id; dialogue_so_far; task_goal
-    policy_context      # invariants + sme_action_policy + personal_requirements
-    candidate_action    # what the agent did
-    expert_action       # what a competent expert would do
-    label               # correct | harm | hassle   (+ severity)
-```
-
-A configurable weighted score can be derived later; the **diagnostic breakdown is the primary product.**
-
-## The diagnostic flywheel
-
-τ-discernment is built to *improve* agents, not just rank them:
-
-```text
-run -> extract every consequential decision -> grade vs expert judgment
-    -> classify harm / hassle -> find recurring failure patterns
-    -> author policy | fix prompts | target training data | re-run
-```
-
-Where an action shows high cross-round dispersion (a low `pass^k`), or a decision type recurs as **harm**, is exactly where the **general policy isn't covering it** and a **domain expert should author a specific rule** — turning a diagnostic signal into targeted, high-value supervision.
-
 ## How to reproduce
 
 | Stage | File | What it does |
